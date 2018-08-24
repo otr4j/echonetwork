@@ -6,17 +6,36 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.readMessage;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.writeMessage;
 
+/**
+ * EchoServer.
+ * <p>
+ * Format: 4-byte message length in bytes, followed by message bytes.
+ */
 public final class EchoServer {
 
+    private static final Logger LOGGER = Logger.getLogger(EchoServer.class.getName());
+
+    private EchoServer() {
+        // No need to instantiate.
+    }
+
+    /**
+     * Main function for starting the EchoServer.
+     *
+     * @param args no program parameters defined
+     * @throws IOException In case of failure to start the server instance.
+     */
     public static void main(@Nonnull final String[] args) throws IOException {
         final ServerSocket server = new ServerSocket(8080);
-        System.err.println("Server started on port " + server.getLocalPort());
+        LOGGER.info("Server started on port " + server.getLocalPort());
         while (!server.isClosed()) {
-            try (final Socket connection = server.accept()) {
+            try (Socket connection = server.accept()) {
                 while (!connection.isClosed()) {
                     final InputStream in = connection.getInputStream();
                     final OutputStream out = connection.getOutputStream();
@@ -27,9 +46,9 @@ public final class EchoServer {
                     writeMessage(out, message);
                 }
             } catch (final IOException e) {
-                e.printStackTrace();
+                LOGGER.log(Level.WARNING, "Failure in client connection.", e);
             }
         }
-        System.err.println("Server shut down.");
+        LOGGER.info("Server shut down.");
     }
 }

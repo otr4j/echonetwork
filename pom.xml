@@ -137,7 +137,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <targetJdk>1.7</targetJdk>
+                    <targetJdk>9</targetJdk>
                     <rulesets>
                         <ruleset>codecheck/pmd-rules.xml</ruleset>
                     </rulesets>
@@ -226,10 +226,15 @@
     </build>
 
     <dependencies>
+        <!--<dependency>-->
+            <!--<groupId>net.java</groupId>-->
+            <!--<artifactId>otr4j</artifactId>-->
+            <!--<version>0.60-SNAPSHOT</version>-->
+        <!--</dependency>-->
         <dependency>
-            <groupId>net.java</groupId>
-            <artifactId>otr4j</artifactId>
-            <version>0.60-SNAPSHOT</version>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.60</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
@@ -237,11 +242,11 @@
             <version>3.0.2</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.1.0-M1</version>
-            <scope>test</scope>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.junit.jupiter</groupId>-->
+            <!--<artifactId>junit-jupiter-api</artifactId>-->
+            <!--<version>5.1.0-M1</version>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
     </dependencies>
 </project>
