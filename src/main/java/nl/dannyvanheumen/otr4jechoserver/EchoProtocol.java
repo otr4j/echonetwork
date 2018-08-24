@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.net.ProtocolException;
 
+import static java.math.BigInteger.valueOf;
 import static org.bouncycastle.util.BigIntegers.asUnsignedByteArray;
 
 final class EchoProtocol {
@@ -41,7 +42,7 @@ final class EchoProtocol {
     }
 
     private static byte[] encodeLength(final int length) {
-        return asUnsignedByteArray(4, BigInteger.valueOf(length));
+        return asUnsignedByteArray(4, valueOf(length));
     }
 
     private static int parseLength(@Nonnull final byte[] lengthBytes) {
