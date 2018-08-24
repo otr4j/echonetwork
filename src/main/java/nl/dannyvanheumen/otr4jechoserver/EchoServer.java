@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.DEFAULT_PORT;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.readMessage;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.writeMessage;
 
@@ -32,7 +33,7 @@ public final class EchoServer {
      * @throws IOException In case of failure to start the server instance.
      */
     public static void main(@Nonnull final String[] args) throws IOException {
-        final ServerSocket server = new ServerSocket(8080);
+        final ServerSocket server = new ServerSocket(DEFAULT_PORT);
         LOGGER.info("Server started on port " + server.getLocalPort());
         while (!server.isClosed()) {
             try (Socket connection = server.accept()) {

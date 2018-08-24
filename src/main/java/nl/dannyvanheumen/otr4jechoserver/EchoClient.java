@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.logging.Logger;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.DEFAULT_PORT;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.readMessage;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.writeMessage;
 
@@ -30,7 +31,7 @@ public final class EchoClient {
      * @throws IOException In case of failure to establish client connection.
      */
     public static void main(@Nonnull final String[] args) throws IOException {
-        try (Socket client = new Socket(InetAddress.getLocalHost(), 8080)) {
+        try (Socket client = new Socket(InetAddress.getLocalHost(), DEFAULT_PORT)) {
             LOGGER.info("Sending ...");
             writeMessage(client.getOutputStream(), "Hello world!".getBytes(UTF_8));
             final byte[] messageBytes = readMessage(client.getInputStream());

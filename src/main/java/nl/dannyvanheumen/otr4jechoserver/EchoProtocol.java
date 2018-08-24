@@ -11,6 +11,8 @@ import static org.bouncycastle.util.BigIntegers.asUnsignedByteArray;
 
 final class EchoProtocol {
 
+    static final int DEFAULT_PORT = 8080;
+
     private EchoProtocol() {
         // No need to instantiate utility class.
     }
