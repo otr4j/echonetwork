@@ -13,9 +13,9 @@ __Message format__
 Session identifiers are simply the local and remote address and port of the established connection.
 
 * Local user session ID: `<local-address-of-connection>:<local-port-of-connection>`  
-  For instance, an _otr4j-echoserver_ would use `localhost:8080`.
+  For instance, an _otr4j-echoserver_ would use `192.168.0.1:8080`.
 * Remote user session ID: `<remove-address-of-connection>:<remote-port-of-connection>`  
-  For instance, an _otr4j-echoclient_ would use `localhost:31645`. (Typically an arbitrary port.)
+  For instance, an _otr4j-echoclient_ would use `192.168.0.1:31645`. (Typically an arbitrary port.)
 * If a network name is needed, use `echo`. (Probably not, should double-check.)
 
-_NOTE_ that we use the local address instead of the host name. This avoids the possibility for ambiguity.
+_NOTE_ that we use the local address instead of the host name. This avoids issues due to multiple host names.
