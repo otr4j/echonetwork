@@ -18,7 +18,7 @@ import java.security.KeyPair;
 import java.security.SecureRandom;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.DSAPublicKey;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,8 +46,10 @@ final class Host implements OtrEngineHost {
     Host(@Nonnull final OutputStream out, @Nonnull final InstanceTag tag) {
         this.out = requireNonNull(out);
         this.tag = requireNonNull(tag);
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_WEEK, 7);
         final ClientProfile profile = new ClientProfile(tag, this.edDSAKeyPair.getPublicKey(),
-                Set.of(OTRv.THREE, OTRv.FOUR), new Date().getTime() / 1000,
+                Set.of(OTRv.THREE, OTRv.FOUR), calendar.getTimeInMillis() / 1000,
                 (DSAPublicKey) this.dsaKeyPair.getPublic());
         this.profilePayload = sign(profile, (DSAPrivateKey) this.dsaKeyPair.getPrivate(), this.edDSAKeyPair);
     }
