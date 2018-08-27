@@ -226,11 +226,11 @@
     </build>
 
     <dependencies>
-        <!--<dependency>-->
-            <!--<groupId>net.java</groupId>-->
-            <!--<artifactId>otr4j</artifactId>-->
-            <!--<version>0.60-SNAPSHOT</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>net.java</groupId>
+            <artifactId>otr4j</artifactId>
+            <version>0.60-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>

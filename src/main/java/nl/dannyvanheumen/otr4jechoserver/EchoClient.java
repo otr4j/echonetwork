@@ -6,7 +6,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.logging.Logger;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.DEFAULT_PORT;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.readMessage;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.writeMessage;
@@ -33,10 +32,15 @@ public final class EchoClient {
     public static void main(@Nonnull final String[] args) throws IOException {
         try (Socket client = new Socket(InetAddress.getLocalHost(), DEFAULT_PORT)) {
             LOGGER.info("Sending ...");
-            writeMessage(client.getOutputStream(), "Hello world!".getBytes(UTF_8));
-            final byte[] messageBytes = readMessage(client.getInputStream());
-            if (messageBytes != null) {
-                LOGGER.info("Received: " + new String(messageBytes, UTF_8));
+            writeMessage(client.getOutputStream(), "Hello world!");
+            final String message = readMessage(client.getInputStream());
+            if (message != null) {
+                LOGGER.info("Received: " + message);
+            }
+            writeMessage(client.getOutputStream(), "?OTRv3?");
+            final String message2 = readMessage(client.getInputStream());
+            if (message2 != null) {
+                LOGGER.info("Received: " + message2);
             }
         }
     }
