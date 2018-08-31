@@ -1,9 +1,6 @@
 package nl.dannyvanheumen.otr4jechoserver;
 
-import net.java.otr4j.api.InstanceTag;
-import net.java.otr4j.api.OtrException;
-import net.java.otr4j.api.Session;
-import net.java.otr4j.api.SessionID;
+import nl.dannyvanheumen.otr4jechoserver.EchoProtocol.Message;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -11,20 +8,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.SecureRandom;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static net.java.otr4j.session.OtrSessionManager.createSession;
+import static java.util.Objects.requireNonNull;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.DEFAULT_PORT;
+import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.generateRemoteID;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.readMessage;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.writeMessage;
-import static nl.dannyvanheumen.otr4jechoserver.EchoSession.generateSessionID;
 
 /**
  * EchoServer.
- * <p>
- * Format: 4-byte message length in bytes, followed by message bytes.
  */
 public final class EchoServer {
 
@@ -41,41 +36,53 @@ public final class EchoServer {
      * @throws IOException In case of failure to start the server instance.
      */
     public static void main(@Nonnull final String[] args) throws IOException {
-        final SecureRandom random = new SecureRandom();
-        final InstanceTag tag = InstanceTag.random(random);
         final ServerSocket server = new ServerSocket(DEFAULT_PORT);
-        LOGGER.info("Server started on port " + server.getLocalPort());
+        LOGGER.info("Server started on " + server.getInetAddress().getHostAddress() + ":" + server.getLocalPort());
         while (!server.isClosed()) {
-            try (Socket connection = server.accept()) {
-                final InputStream in = connection.getInputStream();
-                final OutputStream out = connection.getOutputStream();
-                final SessionID sessionID = generateSessionID(connection);
-                final Host host = new Host(out, tag);
-                final Session session = createSession(sessionID, host);
-                LOGGER.log(Level.INFO, "Server session ID: " + sessionID);
-                while (!connection.isClosed()) {
-                    final String message = readMessage(in);
+            final Socket connection = server.accept();
+            final String connectionID = generateRemoteID(connection);
+            new Handler(connectionID, connection).start();
+        }
+        LOGGER.info("Server shut down.");
+    }
+
+    private static final class Handler extends Thread {
+
+        private static final ConcurrentHashMap<String, OutputStream> connections = new ConcurrentHashMap<>();
+
+        private final String id;
+        private final Socket connection;
+
+        private Handler(@Nonnull final String id, @Nonnull final Socket connection) throws IOException {
+            this.id = requireNonNull(id);
+            this.connection = requireNonNull(connection);
+            connections.put(this.id, this.connection.getOutputStream());
+        }
+
+        @Override
+        public void run() {
+            LOGGER.log(Level.INFO, "Session {0} started.", this.id);
+            try (this.connection) {
+                final InputStream in = this.connection.getInputStream();
+                while (!this.connection.isClosed()) {
+                    final Message message = readMessage(in);
                     if (message == null) {
                         // end of communication
                         break;
                     }
-                    final String plaintext = session.transformReceiving(message);
-                    if (plaintext == null) {
-                        // handled internally by otr4j
+                    final OutputStream destination = connections.get(message.address);
+                    if (destination == null) {
+                        LOGGER.log(Level.INFO, "Dropping message because destination is not available.");
                         continue;
                     }
-                    final String[] parts = session.transformSending(plaintext);
-                    for (final String part : parts) {
-                        writeMessage(out, part);
-                    }
+                    writeMessage(destination, generateRemoteID(this.connection), message.content);
                 }
-            } catch (final OtrException e) {
-                LOGGER.log(Level.WARNING, "OTR exception.", e);
+                LOGGER.log(Level.INFO, "Session {0} finished.", this.id);
             } catch (final IOException e) {
                 LOGGER.log(Level.WARNING, "Failure in client connection.", e);
-                break;
+            } finally {
+                connections.remove(this.id);
             }
         }
-        LOGGER.info("Server shut down.");
     }
 }

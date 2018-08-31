@@ -4,9 +4,13 @@ The otr4j "Echo network" is a "chat network" that is defined to provide a trivia
 
 __Message format__
 
-* LENGTH (4-byte big-endian unsigned integer)  
+* `LENGTH_ADDRESS` (4-byte big-endian unsigned integer)  
+  Indicates the length of the upcoming address.
+* `ADDRESS` (`LENGTH_ADDRESS` bytes of address, encoded in UTF-8)  
+  The address represents the destination address when sending to the Echo server. When the server forwards the content, the address-part is replaced with the origin address.
+* `LENGTH_CONTENT` (4-byte big-endian unsigned integer)  
   Indicates the length of the upcoming message payload.
-* PAYLOAD (<LENGTH> bytes of message, encoded in UTF-8)
+* `CONTENT` (`LENGTH_CONTENT` bytes of message, encoded in UTF-8)
 
 # Session identifiers
 
