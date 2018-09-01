@@ -65,8 +65,6 @@ public final class EchoClient {
                         continue;
                     }
                     LOGGER.log(Level.INFO, "Echoing: {0}", message);
-                    LOGGER.info("Address: " + raw.address);
-                    LOGGER.info("Session ID: " + sessionID);
                     final String[] parts = session.transformSending(message);
                     for (final String part : parts) {
                         writeMessage(out, raw.address, part);
