@@ -8,7 +8,6 @@ import nl.dannyvanheumen.otr4jechoserver.EchoProtocol.Message;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -22,7 +21,6 @@ import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.DEFAULT_PORT;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.generateLocalID;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.readMessage;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.writeMessage;
-import static nl.dannyvanheumen.otr4jechoserver.EchoSession.generateSessionID;
 
 /**
  * EchoClient.
@@ -55,11 +53,7 @@ public final class EchoClient {
             while ((raw = readMessage(client.getInputStream())) != null) {
                 try {
                     final SessionID sessionID = new SessionID(generateLocalID(client), raw.address, "echo");
-                    Session session = SESSIONS.get(sessionID);
-                    if (session == null) {
-                        session = createSession(sessionID, host);
-                        SESSIONS.put(sessionID, session);
-                    }
+                    final Session session = SESSIONS.computeIfAbsent(sessionID, id -> createSession(id, host));
                     final String message = session.transformReceiving(raw.content);
                     if (message == null) {
                         continue;
