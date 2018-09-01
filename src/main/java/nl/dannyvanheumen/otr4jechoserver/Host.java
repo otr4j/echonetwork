@@ -57,8 +57,8 @@ final class Host implements OtrEngineHost {
     @Override
     public void injectMessage(@Nonnull final SessionID sessionID, @Nonnull final String msg) {
         try {
-            writeMessage(this.out, sessionID.getAccountID(), msg);
-        } catch (IOException e) {
+            writeMessage(this.out, sessionID.getUserID(), msg);
+        } catch (final IOException e) {
             throw new IllegalStateException("Failed to inject message in network.", e);
         }
     }

@@ -48,7 +48,7 @@ public final class EchoServer {
 
     private static final class Handler extends Thread {
 
-        private static final ConcurrentHashMap<String, OutputStream> connections = new ConcurrentHashMap<>();
+        private static final ConcurrentHashMap<String, OutputStream> CONNECTIONS = new ConcurrentHashMap<>();
 
         private final String id;
         private final Socket connection;
@@ -56,7 +56,7 @@ public final class EchoServer {
         private Handler(@Nonnull final String id, @Nonnull final Socket connection) throws IOException {
             this.id = requireNonNull(id);
             this.connection = requireNonNull(connection);
-            connections.put(this.id, this.connection.getOutputStream());
+            CONNECTIONS.put(this.id, this.connection.getOutputStream());
         }
 
         @Override
@@ -70,7 +70,7 @@ public final class EchoServer {
                         // end of communication
                         break;
                     }
-                    final OutputStream destination = connections.get(message.address);
+                    final OutputStream destination = CONNECTIONS.get(message.address);
                     if (destination == null) {
                         LOGGER.log(Level.INFO, "Dropping message because destination is not available.");
                         continue;
@@ -81,7 +81,7 @@ public final class EchoServer {
             } catch (final IOException e) {
                 LOGGER.log(Level.WARNING, "Failure in client connection.", e);
             } finally {
-                connections.remove(this.id);
+                CONNECTIONS.remove(this.id);
             }
         }
     }
