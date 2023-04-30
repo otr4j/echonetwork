@@ -8,20 +8,33 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import static java.util.Objects.requireNonNull;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.DEFAULT_PORT;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.generateRemoteID;
-import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.readMessage;
-import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.writeMessage;
+import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.receiveMessage;
+import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.sendMessage;
 
 /**
  * EchoServer.
  */
 public final class EchoServer {
+
+    static {
+        try (InputStream config = EchoServer.class.getResourceAsStream("/logging.properties")) {
+            LogManager.getLogManager().readConfiguration(config);
+            System.err.println("Logging configuration loaded.");
+        } catch (IOException e) {
+            System.err.println("Unable to load logging configuration from logging.properties.");
+            e.printStackTrace(System.err);
+        }
+    }
 
     private static final Logger LOGGER = Logger.getLogger(EchoServer.class.getName());
 
@@ -36,52 +49,55 @@ public final class EchoServer {
      * @throws IOException In case of failure to start the server instance.
      */
     public static void main(@Nonnull final String[] args) throws IOException {
-        final ServerSocket server = new ServerSocket(DEFAULT_PORT);
-        LOGGER.info("Server started on " + server.getInetAddress().getHostAddress() + ":" + server.getLocalPort());
-        while (!server.isClosed()) {
-            final Socket connection = server.accept();
-            final String connectionID = generateRemoteID(connection);
-            new Handler(connectionID, connection).start();
+        LOGGER.log(Level.FINE, "Testing FINE log level");
+        final Map<String, OutputStream> clients = Collections.synchronizedMap(new HashMap<>());
+        try (ServerSocket server = new ServerSocket(DEFAULT_PORT)) {
+            LOGGER.log(Level.INFO, "Server started on {0}:{1}",
+                    new Object[]{server.getInetAddress().getHostAddress(), server.getLocalPort()});
+            while (!server.isClosed()) {
+                final Socket connection = server.accept();
+                final String connectionID = generateRemoteID(connection);
+                clients.put(connectionID, connection.getOutputStream());
+                new Handler(clients, connectionID, connection).start();
+            }
         }
         LOGGER.info("Server shut down.");
     }
 
+    @SuppressWarnings({"PMD.DoNotUseThreads", "resource"})
     private static final class Handler extends Thread {
 
-        private static final ConcurrentHashMap<String, OutputStream> CONNECTIONS = new ConcurrentHashMap<>();
-
+        private final Map<String, OutputStream> clients;
         private final String id;
         private final Socket connection;
 
-        private Handler(@Nonnull final String id, @Nonnull final Socket connection) throws IOException {
+        private Handler(@Nonnull final Map<String,OutputStream> clients, @Nonnull final String id, @Nonnull final Socket connection) {
+            super();
+            this.clients = requireNonNull(clients);
             this.id = requireNonNull(id);
             this.connection = requireNonNull(connection);
-            CONNECTIONS.put(this.id, this.connection.getOutputStream());
         }
 
         @Override
         public void run() {
-            LOGGER.log(Level.INFO, "Session {0} started.", this.id);
-            try (this.connection) {
-                final InputStream in = this.connection.getInputStream();
+            LOGGER.log(Level.INFO, "Session {0} registered.", this.id);
+            try (this.connection; InputStream in = this.connection.getInputStream()) {
                 while (!this.connection.isClosed()) {
-                    final Message message = readMessage(in);
-                    if (message == null) {
-                        // end of communication
-                        break;
-                    }
-                    final OutputStream destination = CONNECTIONS.get(message.address);
+                    final Message message = receiveMessage(in);
+                    final OutputStream destination = this.clients.get(message.address);
                     if (destination == null) {
                         LOGGER.log(Level.INFO, "Dropping message because destination is not available.");
                         continue;
                     }
-                    writeMessage(destination, generateRemoteID(this.connection), message.content);
+                    LOGGER.log(Level.FINE, "Relaying {0} => {1}: {2}",
+                            new Object[]{this.id, message.address, message.content});
+                    sendMessage(destination, generateRemoteID(this.connection), message.content);
                 }
                 LOGGER.log(Level.INFO, "Session {0} finished.", this.id);
             } catch (final IOException e) {
                 LOGGER.log(Level.WARNING, "Failure in client connection.", e);
             } finally {
-                CONNECTIONS.remove(this.id);
+                this.clients.remove(this.id);
             }
         }
     }

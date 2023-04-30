@@ -1,7 +1,6 @@
 package nl.dannyvanheumen.otr4jechoserver;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -23,27 +22,36 @@ final class EchoProtocol {
         // No need to instantiate utility class.
     }
 
-    @Nullable
-    static Message readMessage(@Nonnull final InputStream in) throws IOException {
-        final byte[] address = read(in);
-        if (address == null) {
-            return null;
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    @Nonnull
+    static Message receiveMessage(@Nonnull final InputStream in) throws IOException {
+        synchronized (in) {
+            final byte[] address = readValue(in);
+            final byte[] message = readValue(in);
+            return new Message(new String(address, UTF_8), new String(message, UTF_8));
         }
-        final byte[] message = read(in);
-        if (message == null) {
-            throw new ProtocolException("Failed to acquire 'message' component.");
-        }
-        return new Message(new String(address, UTF_8), new String(message, UTF_8));
     }
 
-    private static byte[] read(@Nonnull final InputStream in) throws IOException {
-        final byte[] length = new byte[4];
-        final int readAddress = in.read(length, 0, length.length);
-        if (readAddress == -1) {
-            return null;
+    static void sendMessage(@Nonnull final OutputStream out, @Nonnull final Message message) throws IOException {
+        sendMessage(out, message.address, message.content);
+    }
+
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    static void sendMessage(@Nonnull final OutputStream out, @Nonnull final String address,
+            @Nonnull final String... messages) throws IOException {
+        synchronized (out) {
+            for (final String message : messages) {
+                writeValue(out, address.getBytes(UTF_8));
+                writeValue(out, message.getBytes(UTF_8));
+            }
+            out.flush();
         }
-        if (readAddress != length.length) {
-            throw new ProtocolException("Failed to acquire a complete message.");
+    }
+
+    private static byte[] readValue(@Nonnull final InputStream in) throws IOException {
+        final byte[] length = new byte[4];
+        if (in.read(length, 0, length.length) != length.length) {
+            throw new ProtocolException("Failure reading message from input.");
         }
         final byte[] entry = new byte[parseLength(length)];
         if (in.read(entry, 0, entry.length) != entry.length) {
@@ -52,23 +60,9 @@ final class EchoProtocol {
         return entry;
     }
 
-    static void writeMessage(@Nonnull final OutputStream out, @Nonnull final Message message) throws IOException {
-        writeMessage(out, message.address, message.content);
-    }
-
-    static void writeMessage(@Nonnull final OutputStream out, @Nonnull final String address,
-            @Nonnull final String message) throws IOException {
-        synchronized (requireNonNull(out)) {
-            final byte[] addressBytes = address.getBytes(UTF_8);
-            final byte[] addressLengthBytes = encodeLength(addressBytes.length);
-            final byte[] messageBytes = message.getBytes(UTF_8);
-            final byte[] messageLengthBytes = encodeLength(messageBytes.length);
-            out.write(addressLengthBytes, 0, addressLengthBytes.length);
-            out.write(addressBytes, 0, addressBytes.length);
-            out.write(messageLengthBytes, 0, messageLengthBytes.length);
-            out.write(messageBytes, 0, messageBytes.length);
-            out.flush();
-        }
+    private static void writeValue(@Nonnull final OutputStream out, @Nonnull final byte[] value) throws IOException {
+        out.write(encodeLength(value.length), 0, 4);
+        out.write(value, 0, value.length);
     }
 
     private static byte[] encodeLength(final int length) {
@@ -91,7 +85,9 @@ final class EchoProtocol {
 
     static final class Message {
 
+        @Nonnull
         final String address;
+        @Nonnull
         final String content;
 
         Message(@Nonnull final String address, @Nonnull final String content) {
