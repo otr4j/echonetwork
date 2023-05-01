@@ -27,11 +27,16 @@ import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.DEFAULT_PORT;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.generateLocalID;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.receiveMessage;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.sendMessage;
+import static nl.dannyvanheumen.otr4jechoserver.util.LogManagers.readResourceConfig;
 
 /**
  * EchoClient.
  */
 public final class StdinClient {
+
+    static {
+        readResourceConfig("/logging.properties");
+    }
 
     private static final Logger LOGGER = Logger.getLogger(EchoClient.class.getName());
 
@@ -71,22 +76,27 @@ public final class StdinClient {
                         }
                     }
                 } catch (final IOException e) {
-                    throw new IllegalStateException("Failed to read from connection.", e);
+                    LOGGER.log(Level.WARNING, "Error reading from input: {0}", e.getMessage());
                 }
             }, "StdinClient:" + localID).start();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
                 while (true) {
-                    final String address = reader.readLine();
-                    if ("".equals(address)) {
-                        break;
-                    }
-                    final String content = reader.readLine();
-                    final SessionID sessionID = new SessionID(localID, address, "echo");
+                    final Message message = parseLine(reader.readLine());
+                    final SessionID sessionID = new SessionID(localID, message.address, "echo");
                     final Session session = SESSIONS.computeIfAbsent(sessionID, id -> createSession(id, host));
-                    final String[] parts = session.transformSending(content);
-                    sendMessage(out, address, parts);
+                    final String[] parts = session.transformSending(message.content);
+                    sendMessage(out, message.address, parts);
                 }
             }
         }
+    }
+    
+    @Nonnull
+    private static Message parseLine(@Nonnull final String line) {
+        final int sepindex = line.indexOf(' ');
+        if (sepindex < 0) {
+            throw new IllegalArgumentException("Invalid message line.");
+        }
+        return new Message(line.substring(0, sepindex), line.substring(sepindex+1));
     }
 }

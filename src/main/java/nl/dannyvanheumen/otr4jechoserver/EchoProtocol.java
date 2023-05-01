@@ -13,7 +13,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 import static org.bouncycastle.util.BigIntegers.asUnsignedByteArray;
 
-// TODO we should extract an EchoOutputStream such that we can atomically write full messages.
 final class EchoProtocol {
 
     static final int DEFAULT_PORT = 8080;

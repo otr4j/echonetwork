@@ -7,14 +7,17 @@ import net.java.otr4j.api.OtrPolicy;
 import net.java.otr4j.api.Session.Version;
 import net.java.otr4j.api.SessionID;
 import net.java.otr4j.crypto.DSAKeyPair;
+import net.java.otr4j.crypto.OtrCryptoException;
 import net.java.otr4j.crypto.ed448.EdDSAKeyPair;
-import net.java.otr4j.io.OtrOutputStream;
+import net.java.otr4j.io.OtrInputStream;
 import net.java.otr4j.messages.ClientProfilePayload;
+import net.java.otr4j.messages.ValidationException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.ProtocolException;
 import java.security.SecureRandom;
 import java.util.Calendar;
 import java.util.Set;
@@ -53,8 +56,8 @@ final class Host implements OtrEngineHost {
                 forging.getPublicKey(),
                 Set.of(Version.THREE, Version.FOUR),
                 this.dsaKeyPair.getPublic());
-        this.profilePayload = ClientProfilePayload.signClientProfile(this.profile, calendar.getTimeInMillis() / 1000,
-                this.dsaKeyPair, this.edDSAKeyPair);
+        //this.profilePayload = ClientProfilePayload.signClientProfile(this.profile, calendar.getTimeInMillis() / 1000,
+        //        this.dsaKeyPair, this.edDSAKeyPair);
     }
 
     @Override

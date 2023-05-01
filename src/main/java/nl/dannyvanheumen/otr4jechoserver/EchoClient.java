@@ -23,11 +23,16 @@ import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.DEFAULT_PORT;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.generateLocalID;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.receiveMessage;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.sendMessage;
+import static nl.dannyvanheumen.otr4jechoserver.util.LogManagers.readResourceConfig;
 
 /**
  * EchoClient.
  */
 public final class EchoClient {
+
+    static {
+        readResourceConfig("/logging.properties");
+    }
 
     private static final Logger LOGGER = Logger.getLogger(EchoClient.class.getName());
 
@@ -58,7 +63,7 @@ public final class EchoClient {
             final Host host = new Host(out, tag, new OtrPolicy(OtrPolicy.REACTIVE));
             Message raw;
             while (true) {
-                LOGGER.log(Level.FINE, "Receiving next message from connection…");
+                LOGGER.log(Level.FINE, "Waiting to receive next message from connection…");
                 raw = receiveMessage(in);
                 try {
                     final SessionID sessionID = new SessionID(localID, raw.address, "echo");

@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import static java.util.Objects.requireNonNull;
@@ -20,6 +19,7 @@ import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.DEFAULT_PORT;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.generateRemoteID;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.receiveMessage;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.sendMessage;
+import static nl.dannyvanheumen.otr4jechoserver.util.LogManagers.readResourceConfig;
 
 /**
  * EchoServer.
@@ -27,13 +27,7 @@ import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.sendMessage;
 public final class EchoServer {
 
     static {
-        try (InputStream config = EchoServer.class.getResourceAsStream("/logging.properties")) {
-            LogManager.getLogManager().readConfiguration(config);
-            System.err.println("Logging configuration loaded.");
-        } catch (IOException e) {
-            System.err.println("Unable to load logging configuration from logging.properties.");
-            e.printStackTrace(System.err);
-        }
+        readResourceConfig("/logging.properties");
     }
 
     private static final Logger LOGGER = Logger.getLogger(EchoServer.class.getName());
@@ -49,7 +43,7 @@ public final class EchoServer {
      * @throws IOException In case of failure to start the server instance.
      */
     public static void main(@Nonnull final String[] args) throws IOException {
-        LOGGER.log(Level.FINE, "Testing FINE log level");
+        LOGGER.log(Level.FINE, "Loglevel 'FINE' is being processed.");
         final Map<String, OutputStream> clients = Collections.synchronizedMap(new HashMap<>());
         try (ServerSocket server = new ServerSocket(DEFAULT_PORT)) {
             LOGGER.log(Level.INFO, "Server started on {0}:{1}",
