@@ -41,9 +41,7 @@ final class Host implements OtrEngineHost {
     private final OtrPolicy policy;
 
     private final OutputStream out;
-    private final ClientProfile profile;
-    
-    private final ClientProfilePayload profilePayload;
+    private ClientProfile profile;
 
     Host(@Nonnull final OutputStream out, @Nonnull final InstanceTag tag, @Nonnull final OtrPolicy policy) {
         this.out = requireNonNull(out);
@@ -56,8 +54,6 @@ final class Host implements OtrEngineHost {
                 forging.getPublicKey(),
                 Set.of(Version.THREE, Version.FOUR),
                 this.dsaKeyPair.getPublic());
-        //this.profilePayload = ClientProfilePayload.signClientProfile(this.profile, calendar.getTimeInMillis() / 1000,
-        //        this.dsaKeyPair, this.edDSAKeyPair);
     }
 
     @Override
@@ -180,13 +176,19 @@ final class Host implements OtrEngineHost {
     }
 
     @Override
-    public void publishClientProfilePayload(@Nonnull final byte[] payload) {
+    public void updateClientProfilePayload(@Nonnull final byte[] payload) {
         LOGGER.log(Level.INFO, "Host was requested to publish ClientProfile-payload. ({0} bytes)", payload.length);
+        final OtrInputStream in = new OtrInputStream(payload);
+        try {
+            this.profile = ClientProfilePayload.readFrom(in).validate();
+        } catch (ValidationException | OtrCryptoException | ProtocolException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Nonnull
     @Override
     public byte[] restoreClientProfilePayload() {
-        return new OtrOutputStream().write(this.profilePayload).toByteArray();
+        return new byte[0];
     }
 }

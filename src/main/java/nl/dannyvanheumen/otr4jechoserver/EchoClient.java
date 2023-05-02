@@ -79,7 +79,7 @@ public final class EchoClient {
                 } catch (final OtrException e) {
                     LOGGER.log(Level.INFO, "Failed to process content.", e);
                 } catch (final Throwable e) {
-                    LOGGER.log(Level.SEVERE, "Encountered problem: {0}", e);
+                    LOGGER.log(Level.SEVERE, "Encountered problem: {0}", new Object[]{e});
                     throw e;
                 }
             }

@@ -89,7 +89,7 @@ public final class EchoServer {
                 }
                 LOGGER.log(Level.INFO, "Session {0} finished.", this.id);
             } catch (final IOException e) {
-                LOGGER.log(Level.WARNING, "Failure in client connection.", e);
+                LOGGER.log(Level.WARNING, "Failure in client connection: {0}", new Object[]{e.getMessage()});
             } finally {
                 this.clients.remove(this.id);
             }

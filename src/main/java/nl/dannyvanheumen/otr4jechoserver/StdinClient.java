@@ -70,7 +70,7 @@ public final class StdinClient {
                         final Session session = SESSIONS.computeIfAbsent(sessionID, id -> createSession(id, host));
                         try {
                             final Session.Msg message = session.transformReceiving(m.content);
-                            LOGGER.log(Level.INFO, "Received: {0}", message.content);
+                            LOGGER.log(Level.INFO, "Received ({0}, {1}): {2}", new Object[]{message.tag, message.status, message.content});
                         } catch (final OtrException e) {
                             LOGGER.log(Level.WARNING, "Failed to process message.", e);
                         }
@@ -90,7 +90,7 @@ public final class StdinClient {
             }
         }
     }
-    
+
     @Nonnull
     private static Message parseLine(@Nonnull final String line) {
         final int sepindex = line.indexOf(' ');
