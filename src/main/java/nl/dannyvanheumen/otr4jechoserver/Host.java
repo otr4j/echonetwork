@@ -20,7 +20,7 @@ import java.io.OutputStream;
 import java.net.ProtocolException;
 import java.security.SecureRandom;
 import java.util.Calendar;
-import java.util.Set;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,7 +52,7 @@ final class Host implements OtrEngineHost {
         this.profile = new ClientProfile(tag,
                 this.edDSAKeyPair.getPublicKey(),
                 forging.getPublicKey(),
-                Set.of(Version.THREE, Version.FOUR),
+                List.of(Version.THREE, Version.FOUR),
                 this.dsaKeyPair.getPublic());
     }
 
