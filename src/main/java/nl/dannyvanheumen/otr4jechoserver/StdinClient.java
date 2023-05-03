@@ -38,7 +38,7 @@ public final class StdinClient {
         readResourceConfig("/logging.properties");
     }
 
-    private static final Logger LOGGER = Logger.getLogger(EchoClient.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(StdinClient.class.getName());
 
     private static final Map<SessionID, Session> SESSIONS = Collections.synchronizedMap(new HashMap<>());
 
