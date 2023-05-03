@@ -5,6 +5,7 @@ import net.java.otr4j.api.OtrException;
 import net.java.otr4j.api.OtrPolicy;
 import net.java.otr4j.api.Session;
 import net.java.otr4j.api.SessionID;
+import net.java.otr4j.session.OtrSessionManager;
 import nl.dannyvanheumen.otr4jechoserver.EchoProtocol.Message;
 
 import javax.annotation.Nonnull;
@@ -16,13 +17,9 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.security.SecureRandom;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static net.java.otr4j.session.OtrSessionManager.createSession;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.DEFAULT_PORT;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.generateLocalID;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.receiveMessage;
@@ -39,8 +36,6 @@ public final class StdinClient {
     }
 
     private static final Logger LOGGER = Logger.getLogger(StdinClient.class.getName());
-
-    private static final Map<SessionID, Session> SESSIONS = Collections.synchronizedMap(new HashMap<>());
 
     private StdinClient() {
         // No need to instantiate.
@@ -61,13 +56,14 @@ public final class StdinClient {
              InputStream in = client.getInputStream()) {
             final String localID = generateLocalID(client);
             final Host host = new Host(out, tag, new OtrPolicy(OtrPolicy.OTRL_POLICY_MANUAL));
+            final OtrSessionManager manager = new OtrSessionManager(host);
             new Thread(() -> {
                 Message m;
                 try {
                     while (true) {
                         m = receiveMessage(in);
                         final SessionID sessionID = new SessionID(localID, m.address, "echo");
-                        final Session session = SESSIONS.computeIfAbsent(sessionID, id -> createSession(id, host));
+                        final Session session = manager.getSession(sessionID);
                         try {
                             final Session.Msg message = session.transformReceiving(m.content);
                             LOGGER.log(Level.INFO, "Received ({0}, {1}): {2}", new Object[]{message.tag, message.status, message.content});
@@ -83,7 +79,7 @@ public final class StdinClient {
                 while (true) {
                     final Message message = parseLine(reader.readLine());
                     final SessionID sessionID = new SessionID(localID, message.address, "echo");
-                    final Session session = SESSIONS.computeIfAbsent(sessionID, id -> createSession(id, host));
+                    final Session session = manager.getSession(sessionID);
                     final String[] parts = session.transformSending(message.content);
                     sendMessage(out, message.address, parts);
                 }

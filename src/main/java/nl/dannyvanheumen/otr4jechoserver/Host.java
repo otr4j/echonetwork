@@ -177,7 +177,7 @@ final class Host implements OtrEngineHost {
 
     @Override
     public void updateClientProfilePayload(@Nonnull final byte[] payload) {
-        LOGGER.log(Level.INFO, "Host was requested to publish ClientProfile-payload. ({0} bytes)", payload.length);
+        LOGGER.log(Level.INFO, "Host was requested to update ClientProfile-payload. ({0} bytes)", payload.length);
         final OtrInputStream in = new OtrInputStream(payload);
         try {
             this.profile = ClientProfilePayload.readFrom(in).validate();
