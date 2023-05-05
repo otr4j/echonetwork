@@ -10,6 +10,7 @@ import net.java.otr4j.crypto.DSAKeyPair;
 import net.java.otr4j.crypto.OtrCryptoException;
 import net.java.otr4j.crypto.ed448.EdDSAKeyPair;
 import net.java.otr4j.io.OtrInputStream;
+import net.java.otr4j.io.OtrOutputStream;
 import net.java.otr4j.messages.ClientProfilePayload;
 import net.java.otr4j.messages.ValidationException;
 
@@ -35,7 +36,6 @@ final class Host implements OtrEngineHost {
 
     private static final SecureRandom RANDOM = new SecureRandom();
     private final DSAKeyPair dsaKeyPair = DSAKeyPair.generateDSAKeyPair(RANDOM);
-
     private final EdDSAKeyPair edDSAKeyPair = EdDSAKeyPair.generate(RANDOM);
 
     private final OtrPolicy policy;
@@ -189,6 +189,10 @@ final class Host implements OtrEngineHost {
     @Nonnull
     @Override
     public byte[] restoreClientProfilePayload() {
-        return new byte[0];
+        final Calendar expiration = Calendar.getInstance();
+        expiration.add(Calendar.HOUR, 24);
+        final ClientProfilePayload payload = ClientProfilePayload.signClientProfile(this.profile,
+                expiration.getTimeInMillis() / 1000, this.dsaKeyPair, this.edDSAKeyPair);
+        return new OtrOutputStream().write(payload).toByteArray();
     }
 }
