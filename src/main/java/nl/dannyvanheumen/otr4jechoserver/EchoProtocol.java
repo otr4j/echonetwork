@@ -8,10 +8,8 @@ import java.math.BigInteger;
 import java.net.ProtocolException;
 import java.net.Socket;
 
-import static java.math.BigInteger.valueOf;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
-import static org.bouncycastle.util.BigIntegers.asUnsignedByteArray;
 
 final class EchoProtocol {
 
@@ -65,7 +63,14 @@ final class EchoProtocol {
     }
 
     private static byte[] encodeLength(final int length) {
-        return asUnsignedByteArray(4, valueOf(length));
+        if (length < 0) {
+            throw new IllegalArgumentException("Illegal value for length. Length must be zero or positive.");
+        }
+        final byte[] bytes = BigInteger.valueOf(length).toByteArray();
+        final byte[] sized = new byte[4];
+        final int offset = Math.max(0, sized.length-bytes.length);
+        System.arraycopy(bytes, 0, sized, offset, sized.length-offset);
+        return sized;
     }
 
     private static int parseLength(@Nonnull final byte[] lengthBytes) {
