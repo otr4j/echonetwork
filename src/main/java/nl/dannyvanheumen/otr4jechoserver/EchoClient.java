@@ -66,7 +66,7 @@ public final class EchoClient {
                 try {
                     final SessionID sessionID = new SessionID(localID, raw.address, "echo");
                     final Session session = manager.getSession(sessionID);
-                    final Session.Msg message = session.transformReceiving(raw.content);
+                    final Session.Result message = session.transformReceiving(raw.content);
                     if (message.content == null) {
                         continue;
                     }

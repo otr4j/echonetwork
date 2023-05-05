@@ -17,9 +17,10 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.security.SecureRandom;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.WARNING;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.DEFAULT_PORT;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.generateLocalID;
 import static nl.dannyvanheumen.otr4jechoserver.EchoProtocol.receiveMessage;
@@ -65,14 +66,14 @@ public final class StdinClient {
                         final SessionID sessionID = new SessionID(localID, m.address, "echo");
                         final Session session = manager.getSession(sessionID);
                         try {
-                            final Session.Msg message = session.transformReceiving(m.content);
-                            LOGGER.log(Level.INFO, "Received ({0}, {1}): {2}", new Object[]{message.tag, message.status, message.content});
+                            final Session.Result message = session.transformReceiving(m.content);
+                            LOGGER.log(INFO, "Received ({0}, {1}): {2}", new Object[]{message.tag, message.status, message.content});
                         } catch (final OtrException e) {
-                            LOGGER.log(Level.WARNING, "Failed to process message.", e);
+                            LOGGER.log(WARNING, "Failed to process message.", e);
                         }
                     }
                 } catch (final IOException e) {
-                    LOGGER.log(Level.WARNING, "Error reading from input: {0}", e.getMessage());
+                    LOGGER.log(WARNING, "Error reading from input: {0}", e.getMessage());
                 }
             }, "StdinClient:" + localID).start();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
