@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- TODO revisit ignored keys to see if pmd ruleset can be stricter. -->
+<!-- Rules selected with relaxed attitude in mind, because these are small applications that hardly suffer backlash from
+     misuse. These rules are selected with the goal to make obvious mistakes apparent such that these do not go unfixed,
+     while ignoring relatively small issues that don't have much impact in these cases. -->
 <ruleset name="Default Maven PMD Plugin Ruleset"
          xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -55,6 +58,7 @@
         <!-- TODO may need to reconsider later. Currently gives too many results that are useless/false positives. -->
         <exclude name="DataflowAnomalyAnalysis"/>
         <exclude name="AvoidDuplicateLiterals"/>
+        <exclude name="CloseResource"/>
     </rule>
     <rule ref="category/java/multithreading.xml">
         <exclude name="AvoidUsingVolatile"/>

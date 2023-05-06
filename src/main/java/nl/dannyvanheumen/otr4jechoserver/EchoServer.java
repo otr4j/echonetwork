@@ -65,7 +65,7 @@ public final class EchoServer {
         private final String id;
         private final Socket connection;
 
-        private Handler(@Nonnull final Map<String,OutputStream> clients, @Nonnull final String id, @Nonnull final Socket connection) {
+        private Handler(@Nonnull final Map<String, OutputStream> clients, @Nonnull final String id, @Nonnull final Socket connection) {
             super();
             this.clients = requireNonNull(clients);
             this.id = requireNonNull(id);

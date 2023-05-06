@@ -68,8 +68,8 @@ final class EchoProtocol {
         }
         final byte[] bytes = BigInteger.valueOf(length).toByteArray();
         final byte[] sized = new byte[4];
-        final int offset = Math.max(0, sized.length-bytes.length);
-        System.arraycopy(bytes, 0, sized, offset, sized.length-offset);
+        final int offset = Math.max(0, sized.length - bytes.length);
+        System.arraycopy(bytes, 0, sized, offset, sized.length - offset);
         return sized;
     }
 

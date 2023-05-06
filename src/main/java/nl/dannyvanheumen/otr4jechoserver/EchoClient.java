@@ -52,7 +52,7 @@ public final class EchoClient {
         Logger.getLogger("").setLevel(Level.FINEST);
         final InstanceTag tag = InstanceTag.random(RANDOM);
         try (Socket connection = new Socket(InetAddress.getLocalHost(), DEFAULT_PORT);
-             InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
+                InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             LOGGER.log(Level.INFO, "Client started on address {0}:{1}",
                     new Object[]{connection.getLocalAddress().getHostAddress(), connection.getLocalPort()});
             final Host host = new Host(out, tag, new OtrPolicy(OtrPolicy.REACTIVE));

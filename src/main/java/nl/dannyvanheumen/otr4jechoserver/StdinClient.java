@@ -53,8 +53,8 @@ public final class StdinClient {
     public static void main(@Nonnull final String[] args) throws IOException, OtrException {
         final InstanceTag tag = InstanceTag.random(new SecureRandom());
         try (Socket client = new Socket(InetAddress.getLocalHost(), DEFAULT_PORT);
-             OutputStream out = client.getOutputStream();
-             InputStream in = client.getInputStream()) {
+                OutputStream out = client.getOutputStream();
+                InputStream in = client.getInputStream()) {
             final String localID = generateLocalID(client);
             final Host host = new Host(out, tag, new OtrPolicy(OtrPolicy.OTRL_POLICY_MANUAL));
             final OtrSessionManager manager = new OtrSessionManager(host);
@@ -94,6 +94,6 @@ public final class StdinClient {
         if (sepindex < 0) {
             throw new IllegalArgumentException("Invalid message line.");
         }
-        return new Message(line.substring(0, sepindex), line.substring(sepindex+1));
+        return new Message(line.substring(0, sepindex), line.substring(sepindex + 1));
     }
 }
