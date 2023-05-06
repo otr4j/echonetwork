@@ -47,7 +47,7 @@ public final class EchoClient {
      * @param args no program parameters defined
      * @throws IOException In case of failure to establish client connection.
      */
-    @SuppressWarnings("PMD.AssignmentInOperand")
+    @SuppressWarnings({"PMD.AssignmentInOperand", "InfiniteLoopStatement"})
     public static void main(@Nonnull final String[] args) throws IOException {
         Logger.getLogger("").setLevel(Level.FINEST);
         final InstanceTag tag = InstanceTag.random(RANDOM);
@@ -76,9 +76,6 @@ public final class EchoClient {
                     sendMessage(out, raw.address, parts);
                 } catch (final OtrException e) {
                     LOGGER.log(Level.INFO, "Failed to process content.", e);
-                } catch (final Throwable e) {
-                    LOGGER.log(Level.SEVERE, "Encountered problem: {0}", new Object[]{e});
-                    throw e;
                 }
             }
         }
