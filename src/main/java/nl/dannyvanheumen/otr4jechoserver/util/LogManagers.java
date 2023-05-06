@@ -16,13 +16,15 @@ public final class LogManagers {
 
     /**
      * Read logging configuration file from resource location.
+     * <p>
+     * Note that {@link System#err} is used to report any issues w.r.t. loading the logging configuration.
      *
      * @param resourcePath the resource path for the logging configuration.
      */
+    @SuppressWarnings("PMD.SystemPrintln")
     public static void readResourceConfig(@Nonnull final String resourcePath) {
         try (InputStream config = LogManagers.class.getResourceAsStream(resourcePath)) {
             LogManager.getLogManager().readConfiguration(config);
-            System.err.println("Logging configuration loaded.");
         } catch (final IOException e) {
             System.err.println("Unable to load logging configuration from resource: " + resourcePath + " (" + e.getMessage() + ")");
         }
