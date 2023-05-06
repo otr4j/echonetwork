@@ -50,7 +50,6 @@
         <exclude name="CommentRequired"/>
     </rule>
     <rule ref="category/java/errorprone.xml">
-        <exclude name="BeanMembersShouldSerialize"/>
         <exclude name="AvoidFieldNameMatchingMethodName"/>
         <exclude name="NullAssignment"/>
         <!-- TODO may need to reconsider later. Currently gives too many results that are useless/false positives. -->
@@ -59,6 +58,8 @@
     </rule>
     <rule ref="category/java/multithreading.xml">
         <exclude name="AvoidUsingVolatile"/>
+        <exclude name="DoNotUseThreads"/>
+        <exclude name="UseConcurrentHashMap"/>
     </rule>
     <rule ref="category/java/performance.xml">
         <exclude name="TooFewBranchesForASwitchStatement"/>

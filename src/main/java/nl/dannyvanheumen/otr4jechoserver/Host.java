@@ -182,7 +182,7 @@ final class Host implements OtrEngineHost {
         try {
             this.profile = ClientProfilePayload.readFrom(in).validate();
         } catch (ValidationException | OtrCryptoException | ProtocolException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException("Invalid client profile payload provided for update and publishing.", e);
         }
     }
 
