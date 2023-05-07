@@ -11,7 +11,10 @@ import java.net.Socket;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
-final class EchoProtocol {
+/**
+ * Utilities for reading/writing messages in the length-value format.
+ */
+public final class EchoProtocol {
 
     static final int DEFAULT_PORT = 8080;
 
@@ -19,9 +22,16 @@ final class EchoProtocol {
         // No need to instantiate utility class.
     }
 
+    /**
+     * Receive a message from the provided inputstream.
+     *
+     * @param in the inputstream
+     * @return Returns the read Message
+     * @throws IOException thrown if failing to read message.
+     */
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     @Nonnull
-    static Message receiveMessage(@Nonnull final InputStream in) throws IOException {
+    public static Message receiveMessage(@Nonnull final InputStream in) throws IOException {
         synchronized (in) {
             final byte[] address = readValue(in);
             final byte[] message = readValue(in);
@@ -29,7 +39,14 @@ final class EchoProtocol {
         }
     }
 
-    static void sendMessage(@Nonnull final OutputStream out, @Nonnull final Message message) throws IOException {
+    /**
+     * Send message to the outputstream.
+     *
+     * @param out the outputstream
+     * @param message the message to be sent.
+     * @throws IOException thrown if failing to write message to outputstream.
+     */
+    public static void sendMessage(@Nonnull final OutputStream out, @Nonnull final Message message) throws IOException {
         sendMessage(out, message.address, message.content);
     }
 
@@ -77,24 +94,51 @@ final class EchoProtocol {
         return new BigInteger(1, lengthBytes).intValue();
     }
 
+    /**
+     * Generate the local ID, in form of `ip-address:port`.
+     *
+     * @param connection the connection
+     * @return Returns the ID.
+     */
     @Nonnull
-    static String generateLocalID(@Nonnull final Socket connection) {
+    public static String generateLocalID(@Nonnull final Socket connection) {
         return connection.getLocalAddress().getHostAddress() + ":" + connection.getLocalPort();
     }
 
+    /**
+     * Generate the remote ID, in the form `ip-adress:port`.
+     *
+     * @param connection the connection
+     * @return Returns the ID.
+     */
     @Nonnull
-    static String generateRemoteID(@Nonnull final Socket connection) {
+    public static String generateRemoteID(@Nonnull final Socket connection) {
         return connection.getInetAddress().getHostAddress() + ":" + connection.getPort();
     }
 
-    static final class Message {
+    /**
+     * The Message.
+     */
+    public static final class Message {
 
+        /**
+         * The address.
+         */
         @Nonnull
-        final String address;
+        public final String address;
+        /**
+         * The content.
+         */
         @Nonnull
-        final String content;
+        public final String content;
 
-        Message(@Nonnull final String address, @Nonnull final String content) {
+        /**
+         * The constructor.
+         *
+         * @param address the address
+         * @param content the content
+         */
+        public Message(@Nonnull final String address, @Nonnull final String content) {
             this.address = requireNonNull(address);
             this.content = requireNonNull(content);
         }
