@@ -1,0 +1,19 @@
+[package]
+name = "otrrecho"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "echoclient"
+path = "src/echoclient.rs"
+
+[[bin]]
+name = "stdinclient"
+path = "src/stdinclient.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+#otrr = "0.1.0"
+otrr = { path = "../otrr" }
+dsa = "0.4.2"
