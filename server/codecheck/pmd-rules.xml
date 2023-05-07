@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- TODO revisit ignored keys to see if pmd ruleset can be stricter. -->
+<!-- Rules selected with relaxed attitude in mind, because these are small applications that hardly suffer backlash from
+     misuse. These rules are selected with the goal to make obvious mistakes apparent such that these do not go unfixed,
+     while ignoring relatively small issues that don't have much impact in these cases. -->
+<ruleset name="Default Maven PMD Plugin Ruleset"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+    <description>Rules set selection based on pmd 6.5.0</description>
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="AccessorClassGeneration"/>
+        <exclude name="LooseCoupling"/>
+        <!-- Even though the detection rule makes sense, currently I prefer the benefit of fine-granular access control. -->
+        <exclude name="AccessorMethodGeneration"/>
+        <exclude name="GuardLogStatement"/>
+        <exclude name="UseVarargs"/>
+        <!-- Although excluding this check sounds bad, these should be all cases where the original exception is not of
+        critical value. In case where this is violated where you would expect to find a root cause, we can correct it.
+        In any case, a stack trace exists. Although it may not be the root cause. For now I can accept this. -->
+        <exclude name="PreserveStackTrace"/>
+    </rule>
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="TooManyStaticImports"/>
+        <exclude name="ShortVariable"/>
+        <exclude name="LongVariable"/>
+        <exclude name="ClassNamingConventions"/>
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="DefaultPackage"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="AvoidFinalLocalVariable"/>
+        <exclude name="AvoidPrefixingMethodParameters"/>
+        <exclude name="ShortClassName"/>
+        <exclude name="ShortMethodName"/>
+        <exclude name="AtLeastOneConstructor"/>
+    </rule>
+    <rule ref="category/java/design.xml">
+        <exclude name="LawOfDemeter"/>
+        <exclude name="ExcessiveParameterList"/>
+        <exclude name="LoosePackageCoupling"/>
+        <!-- TODO definitely revisit DataClass warnings, as they are reasonable but currently simply a fact of otr4j. -->
+        <exclude name="DataClass"/>
+        <exclude name="CyclomaticComplexity"/>
+        <exclude name="NPathComplexity"/>
+        <exclude name="NcssCount"/>
+        <exclude name="TooManyMethods"/>
+        <exclude name="ExcessiveImports"/>
+        <exclude name="ExcessiveMethodLength"/>
+        <exclude name="ExcessiveClassLength"/>
+    </rule>
+    <rule ref="category/java/documentation.xml">
+        <exclude name="CommentSize"/>
+        <exclude name="CommentRequired"/>
+    </rule>
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="AvoidFieldNameMatchingMethodName"/>
+        <exclude name="NullAssignment"/>
+        <!-- TODO may need to reconsider later. Currently gives too many results that are useless/false positives. -->
+        <exclude name="DataflowAnomalyAnalysis"/>
+        <exclude name="AvoidDuplicateLiterals"/>
+        <exclude name="CloseResource"/>
+    </rule>
+    <rule ref="category/java/multithreading.xml">
+        <exclude name="AvoidUsingVolatile"/>
+        <exclude name="DoNotUseThreads"/>
+        <exclude name="UseConcurrentHashMap"/>
+    </rule>
+    <rule ref="category/java/performance.xml">
+        <exclude name="TooFewBranchesForASwitchStatement"/>
+        <exclude name="RedundantFieldInitializer"/>
+        <exclude name="AvoidInstantiatingObjectsInLoops"/>
+    </rule>
+    <rule ref="category/java/security.xml"/>
+</ruleset>
