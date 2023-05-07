@@ -5,3 +5,5 @@ A trivially simple set-up for a communication network to exchange messages. This
 ## TODO
 
 - maven/pom: get rid of all the excess configuration, not necessary for such a trivial project.
+- client-otr4j-jitsi: add logging to identify session state changes.
+- client-otrr: implement stdinclient.
