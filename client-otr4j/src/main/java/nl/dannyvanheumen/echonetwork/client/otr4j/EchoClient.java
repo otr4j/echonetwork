@@ -49,7 +49,6 @@ public final class EchoClient {
      */
     @SuppressWarnings({"PMD.AssignmentInOperand", "InfiniteLoopStatement"})
     public static void main(@Nonnull final String[] args) throws IOException {
-        Logger.getLogger("").setLevel(Level.FINEST);
         final InstanceTag tag = InstanceTag.random(RANDOM);
         try (Socket connection = new Socket(InetAddress.getLocalHost(), DEFAULT_PORT);
                 InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
