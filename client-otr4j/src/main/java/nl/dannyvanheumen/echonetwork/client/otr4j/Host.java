@@ -9,8 +9,8 @@ import net.java.otr4j.api.SessionID;
 import net.java.otr4j.crypto.DSAKeyPair;
 import net.java.otr4j.crypto.OtrCryptoException;
 import net.java.otr4j.crypto.ed448.EdDSAKeyPair;
+import net.java.otr4j.io.OtrEncodables;
 import net.java.otr4j.io.OtrInputStream;
-import net.java.otr4j.io.OtrOutputStream;
 import net.java.otr4j.messages.ClientProfilePayload;
 import net.java.otr4j.messages.ValidationException;
 
@@ -27,7 +27,6 @@ import java.util.logging.Logger;
 
 import static java.lang.Integer.MAX_VALUE;
 import static java.util.Objects.requireNonNull;
-import static net.java.otr4j.session.smp.DSAPublicKeys.fingerprint;
 import static nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.sendMessage;
 
 final class Host implements OtrEngineHost {
@@ -37,23 +36,24 @@ final class Host implements OtrEngineHost {
     private static final SecureRandom RANDOM = new SecureRandom();
     private final DSAKeyPair dsaKeyPair = DSAKeyPair.generateDSAKeyPair(RANDOM);
     private final EdDSAKeyPair edDSAKeyPair = EdDSAKeyPair.generate(RANDOM);
+    
+    private final EdDSAKeyPair forgingKeyPair = EdDSAKeyPair.generate(RANDOM);
 
     private final OtrPolicy policy;
 
     private final OutputStream out;
-    private ClientProfile profile;
+
+    private ClientProfilePayload payload;
 
     Host(@Nonnull final OutputStream out, @Nonnull final InstanceTag tag, @Nonnull final OtrPolicy policy) {
         this.out = requireNonNull(out);
         this.policy = requireNonNull(policy);
         final EdDSAKeyPair forging = EdDSAKeyPair.generate(RANDOM);
         final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_WEEK, 7);
-        this.profile = new ClientProfile(tag,
-                this.edDSAKeyPair.getPublicKey(),
-                forging.getPublicKey(),
-                List.of(Version.THREE, Version.FOUR),
-                this.dsaKeyPair.getPublic());
+        calendar.add(Calendar.HOUR_OF_DAY, 24);
+        this.payload = ClientProfilePayload.signClientProfile(new ClientProfile(tag, this.edDSAKeyPair.getPublicKey(),
+                forging.getPublicKey(), List.of(Version.THREE, Version.FOUR), this.dsaKeyPair.getPublic()),
+                calendar.getTimeInMillis() / 1000, this.dsaKeyPair, this.edDSAKeyPair);
     }
 
     @Override
@@ -114,19 +114,13 @@ final class Host implements OtrEngineHost {
 
     @Nonnull
     @Override
-    public ClientProfile getClientProfile(@Nonnull final SessionID sessionID) {
-        return this.profile;
+    public EdDSAKeyPair getForgingKeyPair(final SessionID sessionID) {
+        return this.forgingKeyPair;
     }
 
     @Override
     public void askForSecret(@Nonnull final SessionID sessionID, @Nonnull final InstanceTag receiverTag, @Nullable final String question) {
         LOGGER.log(Level.FINE, "askForSecret: {0}:{1}: {2}", new Object[]{sessionID, receiverTag, question});
-    }
-
-    @Nonnull
-    @Override
-    public byte[] getLocalFingerprintRaw(@Nonnull final SessionID sessionID) {
-        return fingerprint(this.dsaKeyPair.getPublic());
     }
 
     @Override
@@ -178,9 +172,8 @@ final class Host implements OtrEngineHost {
     @Override
     public void updateClientProfilePayload(@Nonnull final byte[] payload) {
         LOGGER.log(Level.INFO, "Host was requested to update ClientProfile-payload. ({0} bytes)", payload.length);
-        final OtrInputStream in = new OtrInputStream(payload);
         try {
-            this.profile = ClientProfilePayload.readFrom(in).validate();
+            this.payload = ClientProfilePayload.readFrom(new OtrInputStream(payload));
         } catch (ValidationException | OtrCryptoException | ProtocolException e) {
             throw new IllegalArgumentException("Invalid client profile payload provided for update and publishing.", e);
         }
@@ -189,10 +182,6 @@ final class Host implements OtrEngineHost {
     @Nonnull
     @Override
     public byte[] restoreClientProfilePayload() {
-        final Calendar expiration = Calendar.getInstance();
-        expiration.add(Calendar.HOUR, 24);
-        final ClientProfilePayload payload = ClientProfilePayload.signClientProfile(this.profile,
-                expiration.getTimeInMillis() / 1000, this.dsaKeyPair, this.edDSAKeyPair);
-        return new OtrOutputStream().write(payload).toByteArray();
+        return OtrEncodables.encode(this.payload);
     }
 }
