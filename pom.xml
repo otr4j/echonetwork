@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>nl.dannyvanheumen.echonetwork</groupId>
-    <artifactId>parent</artifactId>
+    <artifactId>echonetwork</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -15,4 +15,14 @@
         <module>client-otr4j</module>
         <module>client-otr4j-jitsi</module>
     </modules>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>utils</groupId>
+                <artifactId>utils</artifactId>
+                <version>0.10-SNAPSHOT</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
