@@ -1,12 +1,12 @@
-use std::{cell::RefCell, net::TcpStream, rc::Rc};
+use std::{net::TcpStream, sync::RwLock};
 
 use otrr::{clientprofile::ClientProfile, crypto::dsa};
 
 use crate::protocol::write_message;
 
 pub struct Client {
-    conn: Rc<RefCell<TcpStream>>,
-    keypair: dsa::Keypair,
+    pub conn: RwLock<TcpStream>,
+    pub keypair: dsa::Keypair,
 }
 
 impl otrr::Host for Client {
@@ -15,7 +15,7 @@ impl otrr::Host for Client {
     }
 
     fn inject(&self, address: &[u8], message: &[u8]) {
-        write_message(&mut (*self.conn.as_ref().borrow_mut()), address, message)
+        write_message(&mut (*self.conn.write().unwrap()), address, message)
             .expect("Injection of content must succeed.");
     }
 
@@ -23,7 +23,7 @@ impl otrr::Host for Client {
         &self.keypair
     }
 
-    fn query_smp_secret(&self, question: &[u8]) -> Option<Vec<u8>> {
+    fn query_smp_secret(&self, _question: &[u8]) -> Option<Vec<u8>> {
         todo!()
     }
 
@@ -33,7 +33,10 @@ impl otrr::Host for Client {
 }
 
 impl Client {
-    pub fn new(conn: Rc<RefCell<TcpStream>>) -> Self {
-        Client { conn, keypair: dsa::Keypair::generate() }
+    pub fn new(conn: TcpStream) -> Self {
+        Self {
+            conn: RwLock::new(conn),
+            keypair: dsa::Keypair::generate(),
+        }
     }
 }

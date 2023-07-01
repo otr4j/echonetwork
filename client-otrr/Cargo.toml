@@ -15,5 +15,5 @@ path = "src/stdinclient.rs"
 
 [dependencies]
 #otrr = "0.1.0"
-otrr = { path = "../otrr" }
+otrr = { path = "../../../rust/otrr" }
 dsa = "0.4.2"

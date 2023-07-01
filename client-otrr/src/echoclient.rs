@@ -5,24 +5,20 @@ extern crate dsa;
 extern crate otrr;
 
 use otrr::{Policy, UserMessage};
-use std::{cell::RefCell, net::TcpStream, rc::Rc};
+use std::{net::TcpStream, rc::Rc};
 
 use protocol::write_message;
 
 fn main() {
-    let stream = Rc::new(RefCell::new(
-        TcpStream::connect("127.0.0.1:8080")
-            .expect("Failed to open socket connection to echoserver."),
-    ));
-    let client = Rc::new(client::Client::new(Rc::clone(&stream)));
+    let mut stream = TcpStream::connect("127.0.0.1:8080")
+        .expect("Failed to open socket connection to echoserver.");
     let mut account = otrr::session::Account::new(
-        client,
+        Rc::new(client::Client::new(stream.try_clone().unwrap())),
         Policy::ALLOW_V3 | Policy::WHITESPACE_START_AKE | Policy::ERROR_START_AKE,
     );
     loop {
         println!("Waiting to receive message…");
-        let msg = protocol::read_message(&mut (*stream.as_ref().borrow_mut()))
-            .expect("Failed to read message from stream.");
+        let msg = protocol::read_message(&mut stream).expect("Failed to read message from stream.");
         let result = account.session(&msg.0).receive(&msg.1);
         if let Err(err) = result {
             println!("Error processing received message: {:?}", err);
@@ -92,7 +88,7 @@ fn main() {
             Err(error) => println!("{:?}", error),
             Ok(parts) => {
                 for part in parts {
-                    write_message(&mut (*stream.as_ref().borrow_mut()), &msg.0, &part)
+                    write_message(&mut stream, &msg.0, &part)
                         .expect("Failed to transmit message part.");
                 }
             }
