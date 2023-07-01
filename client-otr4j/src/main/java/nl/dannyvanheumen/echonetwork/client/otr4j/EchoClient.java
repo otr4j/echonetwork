@@ -7,6 +7,7 @@ import net.java.otr4j.api.Session;
 import net.java.otr4j.api.SessionID;
 import net.java.otr4j.session.OtrSessionManager;
 import nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.Message;
+import utils.java.util.logging.LogManagers;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -22,7 +23,6 @@ import static nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.DEFAULT_PORT;
 import static nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.generateLocalID;
 import static nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.receiveMessage;
 import static nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.sendMessage;
-import static nl.dannyvanheumen.echonetwork.util.LogManagers.readResourceConfig;
 
 /**
  * EchoClient.
@@ -30,7 +30,7 @@ import static nl.dannyvanheumen.echonetwork.util.LogManagers.readResourceConfig;
 public final class EchoClient {
 
     static {
-        readResourceConfig("/logging.properties");
+        LogManagers.readResourceConfig("/logging.properties");
     }
 
     private static final Logger LOGGER = Logger.getLogger(EchoClient.class.getName());

@@ -1,8 +1,8 @@
 package nl.dannyvanheumen.echonetwork.server;
 
 import nl.dannyvanheumen.echonetwork.protocol.EchoProtocol;
-import nl.dannyvanheumen.echonetwork.util.LogManagers;
 import nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.Message;
+import utils.java.util.logging.LogManagers;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
