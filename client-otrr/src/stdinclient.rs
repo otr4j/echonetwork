@@ -55,6 +55,7 @@ fn main() {
                 }
                 handle(result.unwrap());
             }
+            // FIXME must check sending on particular outgoing session (instance tag)
             InteropMessage::Send(msg) => {
                 let result = account.session(&msg.0).send(msg.1, &msg.2);
                 for part in result.unwrap() {
