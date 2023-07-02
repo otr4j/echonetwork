@@ -1,6 +1,5 @@
 package nl.dannyvanheumen.echonetwork.server;
 
-import nl.dannyvanheumen.echonetwork.protocol.EchoProtocol;
 import nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.Message;
 import utils.java.util.logging.LogManagers;
 
@@ -20,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 import static nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.DEFAULT_PORT;
 import static nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.generateRemoteID;
 import static nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.receiveMessage;
+import static nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.sendMessage;
 
 /**
  * EchoServer.
@@ -85,7 +85,7 @@ public final class EchoServer {
                     }
                     LOGGER.log(Level.FINE, "Relaying {0} => {1}: {2}",
                             new Object[]{this.id, message.address, message.content});
-                    EchoProtocol.sendMessage(destination, generateRemoteID(this.connection), message.content);
+                    sendMessage(destination, generateRemoteID(this.connection), message.content);
                 }
                 LOGGER.log(Level.INFO, "Session {0} finished.", this.id);
             } catch (final IOException e) {

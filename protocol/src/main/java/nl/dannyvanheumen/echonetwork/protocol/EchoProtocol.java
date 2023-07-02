@@ -137,6 +137,7 @@ public final class EchoProtocol {
          */
         @Nonnull
         public final String address;
+
         /**
          * The content.
          */

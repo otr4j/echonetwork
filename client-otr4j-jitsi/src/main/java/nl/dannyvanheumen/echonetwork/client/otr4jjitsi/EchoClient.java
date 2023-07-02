@@ -8,7 +8,7 @@ import net.java.otr4j.OtrSessionManagerImpl;
 import net.java.otr4j.session.Session;
 import net.java.otr4j.session.SessionID;
 import nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.Message;
-import nl.dannyvanheumen.echonetwork.util.LogManagers;
+import utils.java.util.logging.LogManagers;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;

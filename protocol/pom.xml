@@ -230,10 +230,10 @@
             <version>3.0.2</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>utils</groupId>
-            <artifactId>utils</artifactId>
-            <version>0.10-SNAPSHOT</version>
-        </dependency>
+        <!--<dependency>-->
+        <!--    <groupId>utils</groupId>-->
+        <!--    <artifactId>utils</artifactId>-->
+        <!--    <version>0.10-SNAPSHOT</version>-->
+        <!--</dependency>-->
     </dependencies>
 </project>

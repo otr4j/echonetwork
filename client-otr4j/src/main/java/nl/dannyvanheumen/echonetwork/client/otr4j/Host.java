@@ -1,6 +1,7 @@
 package nl.dannyvanheumen.echonetwork.client.otr4j;
 
 import net.java.otr4j.api.ClientProfile;
+import net.java.otr4j.api.Event;
 import net.java.otr4j.api.InstanceTag;
 import net.java.otr4j.api.OtrEngineHost;
 import net.java.otr4j.api.OtrPolicy;
@@ -15,7 +16,6 @@ import net.java.otr4j.messages.ClientProfilePayload;
 import net.java.otr4j.messages.ValidationException;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ProtocolException;
@@ -66,31 +66,6 @@ final class Host implements OtrEngineHost {
     }
 
     @Override
-    public void unreadableMessageReceived(@Nonnull final SessionID sessionID) {
-        LOGGER.log(Level.FINE, "unreadableMessageReceived: {0}", new Object[]{sessionID});
-    }
-
-    @Override
-    public void unencryptedMessageReceived(@Nonnull final SessionID sessionID, @Nonnull final String msg) {
-        LOGGER.log(Level.FINE, "unencryptedMessageReceived: {0}: {1}", new Object[]{sessionID, msg});
-    }
-
-    @Override
-    public void showError(@Nonnull final SessionID sessionID, @Nonnull final String error) {
-        LOGGER.log(Level.SEVERE, "Client/OTR {1}: {0}", new Object[] {error, sessionID});
-    }
-
-    @Override
-    public void finishedSessionMessage(@Nonnull final SessionID sessionID, @Nonnull final String msgText) {
-        LOGGER.log(Level.FINE, "finishedSessionMessage: {0}: {1}", new Object[]{sessionID, msgText});
-    }
-
-    @Override
-    public void requireEncryptedMessage(@Nonnull final SessionID sessionID, @Nonnull final String msgText) {
-        LOGGER.log(Level.FINE, "requireEncryptedMessage: {0}: {1}", new Object[]{sessionID, msgText});
-    }
-
-    @Override
     public OtrPolicy getSessionPolicy(@Nonnull final SessionID sessionID) {
         return this.policy;
     }
@@ -114,34 +89,8 @@ final class Host implements OtrEngineHost {
 
     @Nonnull
     @Override
-    public EdDSAKeyPair getForgingKeyPair(final SessionID sessionID) {
+    public EdDSAKeyPair getForgingKeyPair(@Nonnull final SessionID sessionID) {
         return this.forgingKeyPair;
-    }
-
-    @Override
-    public void askForSecret(@Nonnull final SessionID sessionID, @Nonnull final InstanceTag receiverTag, @Nullable final String question) {
-        LOGGER.log(Level.FINE, "askForSecret: {0}:{1}: {2}", new Object[]{sessionID, receiverTag, question});
-    }
-
-    @Override
-    public void smpError(@Nonnull final SessionID sessionID, final int tlvType, final boolean cheated) {
-        LOGGER.log(Level.FINE, "smpError: {0}:{1} ({2})", new Object[]{sessionID, tlvType, cheated});
-    }
-
-    @Override
-    public void smpAborted(@Nonnull final SessionID sessionID) {
-        LOGGER.log(Level.FINE, "smpAborted: {0}", new Object[]{sessionID});
-    }
-
-    @Override
-    public void verify(@Nonnull final SessionID sessionID, @Nonnull final String fingerprint) {
-        LOGGER.log(Level.INFO, "Fingerprint {0} verified for session {1}", new Object[] {fingerprint, sessionID});
-    }
-
-    @Override
-    public void unverify(@Nonnull final SessionID sessionID, @Nonnull final String fingerprint) {
-        LOGGER.log(Level.INFO, "Fingerprint {0} verification REMOVED for session {1}", new Object[] {
-                fingerprint, sessionID});
     }
 
     @Override
@@ -152,21 +101,6 @@ final class Host implements OtrEngineHost {
     @Override
     public String getFallbackMessage(@Nonnull final SessionID sessionID) {
         return null;
-    }
-
-    @Override
-    public void messageFromAnotherInstanceReceived(@Nonnull final SessionID sessionID) {
-        LOGGER.log(Level.FINE, "messageFromAnotherInstanceReceived: {0}", new Object[]{sessionID});
-    }
-
-    @Override
-    public void multipleInstancesDetected(@Nonnull final SessionID sessionID) {
-        LOGGER.log(Level.FINE, "multipleInstancesDetected: {0}", new Object[]{sessionID});
-    }
-
-    @Override
-    public void extraSymmetricKeyDiscovered(@Nonnull final SessionID sessionID, @Nonnull final String message, @Nonnull final byte[] extraSymmetricKey, @Nonnull final byte[] tlvData) {
-        LOGGER.log(Level.FINE, "extraSymmetricKeyDiscovered: {0}: {1}", new Object[]{sessionID, message});
     }
 
     @Override
@@ -183,5 +117,53 @@ final class Host implements OtrEngineHost {
     @Override
     public byte[] restoreClientProfilePayload() {
         return OtrEncodables.encode(this.payload);
+    }
+    
+    @SuppressWarnings({"PMD.CompareObjectsWithEquals", "PMD.CognitiveComplexity"})
+    @Override
+    public <T> void handleEvent(@Nonnull final SessionID sessionID, @Nonnull final InstanceTag receiver,
+            @Nonnull final Event<T> event, @Nonnull final T payload) {
+        if (event == Event.UNREADABLE_MESSAGE_RECEIVED) {
+            LOGGER.log(Level.FINE, "unreadableMessageReceived: {0}", new Object[]{sessionID});
+        } else if (event == Event.UNENCRYPTED_MESSAGE_RECEIVED) {
+            final String msg = Event.UNENCRYPTED_MESSAGE_RECEIVED.convert(payload);
+            LOGGER.log(Level.FINE, "unencryptedMessageReceived: {0}: {1}", new Object[]{sessionID, msg});
+        } else if (event == Event.ERROR) {
+            final String error = Event.ERROR.convert(payload);
+            LOGGER.log(Level.SEVERE, "Client/OTR {1}: {0}", new Object[] {error, sessionID});
+        } else if (event == Event.SESSION_FINISHED) {
+            LOGGER.log(Level.FINE, "Session is finished: {0}", new Object[]{sessionID});
+        } else if (event == Event.ENCRYPTED_MESSAGES_REQUIRED) {
+            final String msgText = Event.ENCRYPTED_MESSAGES_REQUIRED.convert(payload);
+            LOGGER.log(Level.FINE, "requireEncryptedMessage: {0}: {1}", new Object[]{sessionID, msgText});
+        } else if (event == Event.SMP_REQUEST_SECRET) {
+            final String question = Event.SMP_REQUEST_SECRET.convert(payload);
+            LOGGER.log(Level.FINE, "askForSecret: {0}:{1}: {2}", new Object[]{sessionID, receiver, question});
+        } else if (event == Event.SMP_ABORTED) {
+            final Event.AbortReason reason = Event.SMP_ABORTED.convert(payload);
+            if (reason == Event.AbortReason.USER) {
+                LOGGER.log(Level.FINE, "SMP aborted: {0}", new Object[]{sessionID});
+            } else if (reason == Event.AbortReason.INTERRUPTION) {
+                LOGGER.log(Level.FINE, "SMP interrupted: {0}", new Object[]{sessionID});
+            } else if (reason == Event.AbortReason.VIOLATION) {
+                LOGGER.log(Level.FINE, "SMP cheated: {0}", new Object[]{sessionID});
+            } else {
+                throw new IllegalArgumentException("Invalid abort reason.");
+            }
+        } else if (event == Event.MESSAGE_FOR_ANOTHER_INSTANCE_RECEIVED) {
+            LOGGER.log(Level.FINE, "messageFromAnotherInstanceReceived: {0}", new Object[]{sessionID});
+        } else if (event == Event.MULTIPLE_INSTANCES_DETECTED) {
+            LOGGER.log(Level.FINE, "multipleInstancesDetected: {0}", new Object[]{sessionID});
+        } else if (event == Event.EXTRA_SYMMETRIC_KEY_DISCOVERED) {
+            final Event.ExtraSymmetricKey extraSymmetricKey = Event.EXTRA_SYMMETRIC_KEY_DISCOVERED.convert(payload);
+            LOGGER.log(Level.FINE, "extraSymmetricKeyDiscovered: {0}: {1}", new Object[]{sessionID, extraSymmetricKey});
+        } else if (event == Event.SMP_COMPLETED) {
+            final Event.SMPResult result = Event.SMP_COMPLETED.convert(payload);
+            if (result.success) {
+                LOGGER.log(Level.INFO, "Fingerprint {0} verified for session {1}", new Object[] {result.fingerprint, sessionID});
+            } else {
+                LOGGER.log(Level.INFO, "Fingerprint {0} verification REMOVED for session {1}", new Object[] {result.fingerprint, sessionID});
+            }
+        }
     }
 }

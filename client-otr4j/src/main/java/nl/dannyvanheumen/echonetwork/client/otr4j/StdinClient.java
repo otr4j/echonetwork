@@ -6,7 +6,9 @@ import net.java.otr4j.api.OtrPolicy;
 import net.java.otr4j.api.Session;
 import net.java.otr4j.api.SessionID;
 import net.java.otr4j.session.OtrSessionManager;
-import nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.Message;
+import nl.dannyvanheumen.echonetwork.protocol.EchoProtocol;
+import utils.java.lang.Strings;
+import utils.java.util.logging.LogManagers;
 
 import javax.annotation.Nonnull;
 import java.io.BufferedReader;
@@ -19,13 +21,13 @@ import java.net.Socket;
 import java.security.SecureRandom;
 import java.util.logging.Logger;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.DEFAULT_PORT;
 import static nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.generateLocalID;
 import static nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.receiveMessage;
 import static nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.sendMessage;
-import static nl.dannyvanheumen.echonetwork.util.LogManagers.readResourceConfig;
 
 /**
  * EchoClient.
@@ -33,7 +35,7 @@ import static nl.dannyvanheumen.echonetwork.util.LogManagers.readResourceConfig;
 public final class StdinClient {
 
     static {
-        readResourceConfig("/logging.properties");
+        LogManagers.readResourceConfig("/logging.properties");
     }
 
     private static final Logger LOGGER = Logger.getLogger(StdinClient.class.getName());
@@ -59,7 +61,7 @@ public final class StdinClient {
             final Host host = new Host(out, tag, new OtrPolicy(OtrPolicy.OTRL_POLICY_MANUAL));
             final OtrSessionManager manager = new OtrSessionManager(host);
             new Thread(() -> {
-                Message m;
+                EchoProtocol.Message m;
                 try {
                     while (true) {
                         m = receiveMessage(in);
@@ -81,6 +83,7 @@ public final class StdinClient {
                     final Message message = parseLine(reader.readLine());
                     final SessionID sessionID = new SessionID(localID, message.address, "echo");
                     final Session session = manager.getSession(sessionID);
+                    // FIXME how to transform for particular instance tag? (seems missing in API)
                     final String[] parts = session.transformSending(message.content);
                     sendMessage(out, message.address, parts);
                 }
@@ -90,10 +93,28 @@ public final class StdinClient {
 
     @Nonnull
     private static Message parseLine(@Nonnull final String line) {
-        final int sepindex = line.indexOf(' ');
-        if (sepindex < 0) {
+        final String[] parts = Strings.cut(line, ' ');
+        if (parts[1] == null) {
             throw new IllegalArgumentException("Invalid message line.");
         }
-        return new Message(line.substring(0, sepindex), line.substring(sepindex + 1));
+        final String[] addr = Strings.cut(parts[0], '#');
+        if (addr[1] == null) {
+            return new Message(parts[0], 0, parts[1]);
+        } else {
+            final int tag = Integer.parseInt(addr[1]);
+            return new Message(addr[0], tag, parts[1]);
+        }
+    }
+
+    private static class Message {
+        private final String address;
+        private final int tag;
+        private final String content;
+
+        private Message(@Nonnull final String address, final int tag, @Nonnull final String content) {
+            this.address = requireNonNull(address);
+            this.tag = tag;
+            this.content = requireNonNull(content);
+        }
     }
 }

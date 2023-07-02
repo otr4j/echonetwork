@@ -8,6 +8,8 @@ import net.java.otr4j.OtrSessionManagerImpl;
 import net.java.otr4j.session.Session;
 import net.java.otr4j.session.SessionID;
 import nl.dannyvanheumen.echonetwork.protocol.EchoProtocol;
+import utils.java.lang.Strings;
+import utils.java.util.logging.LogManagers;
 
 import javax.annotation.Nonnull;
 import java.io.BufferedReader;
@@ -19,9 +21,9 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.logging.Logger;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
-import static nl.dannyvanheumen.echonetwork.util.LogManagers.readResourceConfig;
 
 /**
  * EchoClient.
@@ -29,7 +31,7 @@ import static nl.dannyvanheumen.echonetwork.util.LogManagers.readResourceConfig;
 public final class StdinClient {
 
     static {
-        readResourceConfig("/logging.properties");
+        LogManagers.readResourceConfig("/logging.properties");
     }
 
     private static final Logger LOGGER = Logger.getLogger(StdinClient.class.getName());
@@ -73,7 +75,7 @@ public final class StdinClient {
             }, "StdinClient:" + localID).start();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
                 while (true) {
-                    final EchoProtocol.Message message = parseLine(reader.readLine());
+                    final Message message = parseLine(reader.readLine());
                     final SessionID sessionID = new SessionID(localID, message.address, "echo");
                     final Session session = manager.getSession(sessionID);
                     final String[] parts = session.transformSending(message.content);
@@ -84,11 +86,28 @@ public final class StdinClient {
     }
 
     @Nonnull
-    private static EchoProtocol.Message parseLine(@Nonnull final String line) {
-        final int sepindex = line.indexOf(' ');
-        if (sepindex < 0) {
+    private static Message parseLine(@Nonnull final String line) {
+        final String[] parts = Strings.cut(line, ' ');
+        if (parts[1] == null) {
             throw new IllegalArgumentException("Invalid message line.");
         }
-        return new EchoProtocol.Message(line.substring(0, sepindex), line.substring(sepindex + 1));
+        final String[] addr = Strings.cut(parts[0], '#');
+        if (addr[1] == null) {
+            return new Message(parts[0], 0, parts[1]);
+        } else {
+            return new Message(addr[0], Integer.parseInt(addr[1]), parts[1]);
+        }
+    }
+
+    private static class Message {
+        private final String address;
+        private final int tag;
+        private final String content;
+        
+        private Message(@Nonnull final String address, final int tag, @Nonnull final String content) {
+            this.address = requireNonNull(address);
+            this.tag = tag;
+            this.content = requireNonNull(content);
+        }
     }
 }

@@ -15,9 +15,8 @@ mod client;
 mod protocol;
 
 fn main() {
-    let mut stream = TcpStream::connect("127.0.0.1:8080")
+    let mut conn = TcpStream::connect("127.0.0.1:8080")
         .expect("Failed to open socket connection to echoserver.");
-    let mut serverconn = stream.try_clone().unwrap();
     let (interop_sender, interop_receiver) = mpsc::sync_channel::<InteropMessage>(250);
     let input_sender = interop_sender.clone();
 
@@ -33,8 +32,9 @@ fn main() {
         }
     });
 
+    let mut conn_receive = conn.try_clone().unwrap();
     thread::spawn(move || loop {
-        let data = read_message(&mut serverconn);
+        let data = read_message(&mut conn_receive);
         if data.is_err() {
             continue;
         }
@@ -43,7 +43,7 @@ fn main() {
     });
 
     let mut account = otrr::session::Account::new(
-        Rc::new(client::Client::new(stream.try_clone().unwrap())),
+        Rc::new(client::Client::new(conn.try_clone().unwrap())),
         Policy::ALLOW_V3 | Policy::WHITESPACE_START_AKE | Policy::ERROR_START_AKE,
     );
     loop {
@@ -58,7 +58,7 @@ fn main() {
             InteropMessage::Send(msg) => {
                 let result = account.session(&msg.0).send(msg.1, &msg.2);
                 for part in result.unwrap() {
-                    write_message(&mut stream, &msg.0, &part).unwrap();
+                    write_message(&mut conn, &msg.0, &part).unwrap();
                 }
             }
         }
