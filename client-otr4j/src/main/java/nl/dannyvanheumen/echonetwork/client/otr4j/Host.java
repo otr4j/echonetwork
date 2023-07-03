@@ -1,3 +1,7 @@
+/*
+ * client-otr4j, the echonetwork client for otr4j.
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
 package nl.dannyvanheumen.echonetwork.client.otr4j;
 
 import net.java.otr4j.api.ClientProfile;

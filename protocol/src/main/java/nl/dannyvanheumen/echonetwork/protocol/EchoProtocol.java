@@ -1,3 +1,7 @@
+/*
+ * protocol, the protocol (convenience) logic for the echonetwork.
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
 package nl.dannyvanheumen.echonetwork.protocol;
 
 import javax.annotation.Nonnull;

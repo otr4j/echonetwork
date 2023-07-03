@@ -1,3 +1,7 @@
+/*
+ * server, the echonetwork (relay) server.
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
 package nl.dannyvanheumen.echonetwork.server;
 
 import nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.Message;

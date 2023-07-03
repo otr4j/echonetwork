@@ -165,7 +165,7 @@
                 <configuration>
                     <targetJdk>9</targetJdk>
                     <rulesets>
-                        <ruleset>codecheck/pmd-rules.xml</ruleset>
+                        <ruleset>.config/pmd-rules.xml</ruleset>
                     </rulesets>
                     <failOnViolation>true</failOnViolation>
                     <printFailingErrors>true</printFailingErrors>
@@ -183,7 +183,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <excludeFilterFile>${project.basedir}/codecheck/spotbugs-filter.xml</excludeFilterFile>
+                    <excludeFilterFile>.config/spotbugs-filter.xml</excludeFilterFile>
                 </configuration>
             </plugin>
             <plugin>
@@ -206,7 +206,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <configLocation>codecheck/checkstyle.xml</configLocation>
+                    <configLocation>.config/checkstyle.xml</configLocation>
+                    <headerLocation>.config/header.txt</headerLocation>
                 </configuration>
             </plugin>
             <plugin>
