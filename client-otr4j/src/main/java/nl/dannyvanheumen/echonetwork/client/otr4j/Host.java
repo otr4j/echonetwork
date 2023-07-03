@@ -26,6 +26,7 @@ import java.net.ProtocolException;
 import java.security.SecureRandom;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,6 +39,9 @@ final class Host implements OtrEngineHost {
     private static final Logger LOGGER = Logger.getLogger(Host.class.getName());
 
     private static final SecureRandom RANDOM = new SecureRandom();
+    
+    public final ArrayBlockingQueue<Action<?>> actions = new ArrayBlockingQueue<>(9);
+
     private final DSAKeyPair dsaKeyPair = DSAKeyPair.generateDSAKeyPair(RANDOM);
     private final EdDSAKeyPair edDSAKeyPair = EdDSAKeyPair.generate(RANDOM);
     
@@ -143,6 +147,7 @@ final class Host implements OtrEngineHost {
         } else if (event == Event.SMP_REQUEST_SECRET) {
             final String question = Event.SMP_REQUEST_SECRET.convert(payload);
             LOGGER.log(Level.FINE, "askForSecret: {0}:{1}: {2}", new Object[]{sessionID, receiver, question});
+            this.actions.add(new Action<>(sessionID, receiver, Event.SMP_REQUEST_SECRET, question));
         } else if (event == Event.SMP_ABORTED) {
             final Event.AbortReason reason = Event.SMP_ABORTED.convert(payload);
             if (reason == Event.AbortReason.USER) {
@@ -168,6 +173,20 @@ final class Host implements OtrEngineHost {
             } else {
                 LOGGER.log(Level.INFO, "Fingerprint {0} verification REMOVED for session {1}", new Object[] {result.fingerprint, sessionID});
             }
+        }
+    }
+
+    final static class Action<T> {
+        public final SessionID sessionID;
+        public final InstanceTag tag;
+        public final Event<T> event;
+        public final T payload;
+
+        public Action(final SessionID sessionID, final InstanceTag tag, final Event<T> event, final T payload) {
+            this.sessionID = requireNonNull(sessionID);
+            this.tag = requireNonNull(tag);
+            this.event = requireNonNull(event);
+            this.payload = requireNonNull(payload);
         }
     }
 }

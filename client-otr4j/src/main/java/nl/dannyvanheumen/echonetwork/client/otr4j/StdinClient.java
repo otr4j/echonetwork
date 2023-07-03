@@ -10,8 +10,10 @@ import net.java.otr4j.api.OtrPolicy;
 import net.java.otr4j.api.Session;
 import net.java.otr4j.api.SessionID;
 import net.java.otr4j.session.OtrSessionManager;
+import nl.dannyvanheumen.echonetwork.protocol.Client;
 import nl.dannyvanheumen.echonetwork.protocol.EchoProtocol;
 import utils.java.lang.Strings;
+import utils.java.lang.Threads;
 import utils.java.util.logging.LogManagers;
 
 import javax.annotation.Nonnull;
@@ -36,7 +38,7 @@ import static nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.sendMessage;
 /**
  * EchoClient.
  */
-public final class StdinClient {
+public final class StdinClient implements Client {
 
     static {
         LogManagers.readResourceConfig("/logging.properties");
@@ -55,21 +57,21 @@ public final class StdinClient {
      * @throws IOException In case of failure to establish client connection.
      * @throws OtrException In case of OTR-based exceptions.
      */
-    @SuppressWarnings({"PMD.DoNotUseThreads", "PMD.AssignmentInOperand"})
+    @SuppressWarnings({"PMD.DoNotUseThreads", "PMD.AssignmentInOperand", "InfiniteLoopStatement"})
     public static void main(@Nonnull final String[] args) throws IOException, OtrException {
         final InstanceTag tag = InstanceTag.random(new SecureRandom());
         try (Socket client = new Socket(InetAddress.getLocalHost(), DEFAULT_PORT);
-                OutputStream out = client.getOutputStream();
-                InputStream in = client.getInputStream()) {
+            OutputStream out = client.getOutputStream(); InputStream in = client.getInputStream()) {
             final String localID = generateLocalID(client);
             final Host host = new Host(out, tag, new OtrPolicy(OtrPolicy.OTRL_POLICY_MANUAL));
             final OtrSessionManager manager = new OtrSessionManager(host);
-            new Thread(() -> {
-                EchoProtocol.Message m;
+            // Network communications thread.
+            Threads.startDaemon("StdinClient:" + localID, () -> {
                 try {
+                    EchoProtocol.Message m;
                     while (true) {
                         m = receiveMessage(in);
-                        final SessionID sessionID = new SessionID(localID, m.address, "echo");
+                        final SessionID sessionID = new SessionID(localID, m.address, DEFAULT_PROTOCOL_NAME);
                         final Session session = manager.getSession(sessionID);
                         try {
                             final Session.Result message = session.transformReceiving(m.content);
@@ -81,11 +83,12 @@ public final class StdinClient {
                 } catch (final IOException e) {
                     LOGGER.log(WARNING, "Error reading from input: {0}", e.getMessage());
                 }
-            }, "StdinClient:" + localID).start();
+            }, Threads.createLoggingHandler(LOGGER));
+            // Event loop for processing user input.
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
                 while (true) {
                     final Message message = parseLine(reader.readLine());
-                    final SessionID sessionID = new SessionID(localID, message.address, "echo");
+                    final SessionID sessionID = new SessionID(localID, message.address, DEFAULT_PROTOCOL_NAME);
                     final Session session = manager.getSession(sessionID);
                     // FIXME how to transform for particular instance tag? (seems missing in API)
                     final String[] parts = session.transformSending(message.content);
@@ -101,7 +104,7 @@ public final class StdinClient {
         if (parts[1] == null) {
             throw new IllegalArgumentException("Invalid message line.");
         }
-        final String[] addr = Strings.cut(parts[0], '#');
+        final String[] addr = Strings.cut(parts[0], TAG_SEPARATOR);
         if (addr[1] == null) {
             return new Message(parts[0], 0, parts[1]);
         } else {

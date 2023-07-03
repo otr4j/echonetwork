@@ -107,7 +107,7 @@ public final class StdinClient {
         private final String address;
         private final int tag;
         private final String content;
-        
+
         private Message(@Nonnull final String address, final int tag, @Nonnull final String content) {
             this.address = requireNonNull(address);
             this.tag = tag;
