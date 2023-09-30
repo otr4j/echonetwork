@@ -1,6 +1,6 @@
 use std::{net::TcpStream, sync::RwLock};
 
-use otrr::{clientprofile::ClientProfile, crypto::dsa};
+use otrr::{crypto::dsa, crypto::ed448};
 
 use crate::protocol::write_message;
 
@@ -23,11 +23,19 @@ impl otrr::Host for Client {
         &self.keypair
     }
 
+	fn keypair_identity(&self) -> &ed448::KeyPair {
+		todo!()
+	}
+
+	fn keypair_forging(&self) -> &ed448::KeyPair {
+		todo!()
+	}
+
     fn query_smp_secret(&self, _question: &[u8]) -> Option<Vec<u8>> {
         todo!()
     }
 
-    fn client_profile(&self) -> &ClientProfile {
+    fn client_profile(&self) -> Vec<u8> {
         todo!()
     }
 }
