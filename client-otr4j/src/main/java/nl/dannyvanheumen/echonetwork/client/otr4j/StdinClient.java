@@ -54,14 +54,14 @@ public final class StdinClient implements Client {
      * Main function for starting the client.
      *
      * @param args no program parameters defined
-     * @throws IOException In case of failure to establish client connection.
+     * @throws IOException  In case of failure to establish client connection.
      * @throws OtrException In case of OTR-based exceptions.
      */
     @SuppressWarnings({"PMD.DoNotUseThreads", "PMD.AssignmentInOperand", "InfiniteLoopStatement"})
     public static void main(@Nonnull final String[] args) throws IOException, OtrException {
         final InstanceTag tag = InstanceTag.random(new SecureRandom());
         try (Socket client = new Socket(InetAddress.getLocalHost(), DEFAULT_PORT);
-            OutputStream out = client.getOutputStream(); InputStream in = client.getInputStream()) {
+             OutputStream out = client.getOutputStream(); InputStream in = client.getInputStream()) {
             final String localID = generateLocalID(client);
             final Host host = new Host(out, tag, new OtrPolicy(OtrPolicy.OTRL_POLICY_MANUAL));
             final OtrSessionManager manager = new OtrSessionManager(host);

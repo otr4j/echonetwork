@@ -55,7 +55,7 @@ public final class EchoClient implements Client {
     public static void main(@Nonnull final String[] args) throws IOException {
         final InstanceTag tag = InstanceTag.random(new SecureRandom());
         try (Socket connection = new Socket(InetAddress.getLocalHost(), DEFAULT_PORT);
-            InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
+             InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             LOGGER.log(Level.INFO, "Client started on address {0}:{1}",
                 new Object[]{connection.getLocalAddress().getHostAddress(), connection.getLocalPort()});
             final String localID = generateLocalID(connection);
@@ -89,6 +89,7 @@ public final class EchoClient implements Client {
         }
     }
 
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     private static void processActions(final Host host, final OtrSessionManager manager) {
         for (Host.Action<?> action = host.actions.poll(); action != null; action = host.actions.poll()) {
             LOGGER.log(Level.FINE, "Handling actions queue for event follow-up…");

@@ -53,9 +53,9 @@ public final class EchoClient {
     public static void main(@Nonnull final String[] args) throws IOException {
         Logger.getLogger("").setLevel(Level.FINEST);
         try (Socket connection = new Socket(InetAddress.getLocalHost(), DEFAULT_PORT);
-                InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
+             InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             LOGGER.log(Level.INFO, "Client started on address {0}:{1}",
-                    new Object[]{connection.getLocalAddress().getHostAddress(), connection.getLocalPort()});
+                new Object[]{connection.getLocalAddress().getHostAddress(), connection.getLocalPort()});
             final Host host = new Host(out, new OtrPolicyImpl(OtrPolicy.ALLOW_V2 | OtrPolicy.ALLOW_V3 | OtrPolicy.ERROR_START_AKE | OtrPolicy.WHITESPACE_START_AKE));
             final OtrSessionManager manager = new OtrSessionManagerImpl(host);
             final String localID = generateLocalID(connection);

@@ -52,8 +52,8 @@
         <module name="Indentation">
             <property name="basicOffset" value="4"/>
             <property name="caseIndent" value="0"/>
-            <property name="lineWrappingIndentation" value="8"/>
-            <property name="throwsIndent" value="8"/>
+<!--            <property name="lineWrappingIndentation" value="8"/>-->
+<!--            <property name="throwsIndent" value="8"/>-->
             <property name="forceStrictCondition" value="false"/>
         </module>
     </module>

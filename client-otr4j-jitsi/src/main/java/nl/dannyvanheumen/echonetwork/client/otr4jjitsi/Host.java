@@ -26,7 +26,7 @@ import static nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.sendMessage;
 final class Host implements OtrEngineHost {
 
     private static final Logger LOGGER = Logger.getLogger(Host.class.getName());
-    
+
     private final KeyPair keypair;
 
     private final OtrPolicy policy;
@@ -60,7 +60,7 @@ final class Host implements OtrEngineHost {
 
     @Override
     public void showError(@Nonnull final SessionID sessionID, @Nonnull final String error) {
-        LOGGER.log(Level.SEVERE, "Client/OTR {1}: {0}", new Object[] {error, sessionID});
+        LOGGER.log(Level.SEVERE, "Client/OTR {1}: {0}", new Object[]{error, sessionID});
     }
 
     @Override
@@ -115,13 +115,13 @@ final class Host implements OtrEngineHost {
 
     @Override
     public void verify(@Nonnull final SessionID sessionID, @Nonnull final String fingerprint, final boolean approve) {
-        LOGGER.log(Level.INFO, "Fingerprint {0} verified for session {1}", new Object[] {fingerprint, sessionID});
+        LOGGER.log(Level.INFO, "Fingerprint {0} verified for session {1}", new Object[]{fingerprint, sessionID});
     }
 
     @Override
     public void unverify(@Nonnull final SessionID sessionID, @Nonnull final String fingerprint) {
-        LOGGER.log(Level.INFO, "Fingerprint {0} verification REMOVED for session {1}", new Object[] {
-                fingerprint, sessionID});
+        LOGGER.log(Level.INFO, "Fingerprint {0} verification REMOVED for session {1}", new Object[]{
+            fingerprint, sessionID});
     }
 
     @Override

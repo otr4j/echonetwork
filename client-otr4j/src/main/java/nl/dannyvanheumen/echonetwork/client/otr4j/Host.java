@@ -39,12 +39,12 @@ final class Host implements OtrEngineHost {
     private static final Logger LOGGER = Logger.getLogger(Host.class.getName());
 
     private static final SecureRandom RANDOM = new SecureRandom();
-    
+
     public final ArrayBlockingQueue<Action<?>> actions = new ArrayBlockingQueue<>(9);
 
     private final DSAKeyPair dsaKeyPair = DSAKeyPair.generateDSAKeyPair(RANDOM);
     private final EdDSAKeyPair edDSAKeyPair = EdDSAKeyPair.generate(RANDOM);
-    
+
     private final EdDSAKeyPair forgingKeyPair = EdDSAKeyPair.generate(RANDOM);
 
     private final OtrPolicy policy;
@@ -61,7 +61,7 @@ final class Host implements OtrEngineHost {
         calendar.add(Calendar.HOUR_OF_DAY, 24);
         this.payload = ClientProfilePayload.signClientProfile(new ClientProfile(tag, this.edDSAKeyPair.getPublicKey(),
                 forging.getPublicKey(), List.of(Version.THREE, Version.FOUR), this.dsaKeyPair.getPublic()),
-                calendar.getTimeInMillis() / 1000, this.dsaKeyPair, this.edDSAKeyPair);
+            calendar.getTimeInMillis() / 1000, this.dsaKeyPair, this.edDSAKeyPair);
     }
 
     @Override
@@ -126,11 +126,11 @@ final class Host implements OtrEngineHost {
     public byte[] restoreClientProfilePayload() {
         return OtrEncodables.encode(this.payload);
     }
-    
+
     @SuppressWarnings({"PMD.CompareObjectsWithEquals", "PMD.CognitiveComplexity"})
     @Override
     public <T> void handleEvent(@Nonnull final SessionID sessionID, @Nonnull final InstanceTag receiver,
-            @Nonnull final Event<T> event, @Nonnull final T payload) {
+                                @Nonnull final Event<T> event, @Nonnull final T payload) {
         if (event == Event.UNREADABLE_MESSAGE_RECEIVED) {
             LOGGER.log(Level.FINE, "unreadableMessageReceived: {0}", new Object[]{sessionID});
         } else if (event == Event.UNENCRYPTED_MESSAGE_RECEIVED) {
@@ -138,7 +138,7 @@ final class Host implements OtrEngineHost {
             LOGGER.log(Level.FINE, "unencryptedMessageReceived: {0}: {1}", new Object[]{sessionID, msg});
         } else if (event == Event.ERROR) {
             final String error = Event.ERROR.convert(payload);
-            LOGGER.log(Level.SEVERE, "Client/OTR {1}: {0}", new Object[] {error, sessionID});
+            LOGGER.log(Level.SEVERE, "Client/OTR {1}: {0}", new Object[]{error, sessionID});
         } else if (event == Event.SESSION_FINISHED) {
             LOGGER.log(Level.FINE, "Session is finished: {0}", new Object[]{sessionID});
         } else if (event == Event.ENCRYPTED_MESSAGES_REQUIRED) {
@@ -169,9 +169,9 @@ final class Host implements OtrEngineHost {
         } else if (event == Event.SMP_COMPLETED) {
             final Event.SMPResult result = Event.SMP_COMPLETED.convert(payload);
             if (result.success) {
-                LOGGER.log(Level.INFO, "Fingerprint {0} verified for session {1}", new Object[] {result.fingerprint, sessionID});
+                LOGGER.log(Level.INFO, "Fingerprint {0} verified for session {1}", new Object[]{result.fingerprint, sessionID});
             } else {
-                LOGGER.log(Level.INFO, "Fingerprint {0} verification REMOVED for session {1}", new Object[] {result.fingerprint, sessionID});
+                LOGGER.log(Level.INFO, "Fingerprint {0} verification REMOVED for session {1}", new Object[]{result.fingerprint, sessionID});
             }
         }
     }
