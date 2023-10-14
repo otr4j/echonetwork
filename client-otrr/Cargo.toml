@@ -16,4 +16,6 @@ path = "src/stdinclient.rs"
 [dependencies]
 #otrr = "0.1.0"
 otrr = { path = "../..//otrr" }
-dsa = "0.4.2"
+dsa = "0.6"
+log = "0.4"
+env_logger = "0.9"

@@ -10,12 +10,15 @@ use std::{net::TcpStream, rc::Rc};
 use protocol::write_message;
 
 fn main() {
+	env_logger::init();
+	log::set_max_level(log::LevelFilter::Trace);
+	// Connect with echo-network server.
     let mut stream = TcpStream::connect("127.0.0.1:8080")
         .expect("Failed to open socket connection to echoserver.");
     let mut account = otrr::session::Account::new(
         Rc::new(client::Client::new(stream.try_clone().unwrap())),
-        Policy::ALLOW_V3 | Policy::WHITESPACE_START_AKE | Policy::ERROR_START_AKE,
-    );
+        Policy::ALLOW_V3 | Policy::ALLOW_V4 | Policy::WHITESPACE_START_AKE | Policy::ERROR_START_AKE,
+    ).unwrap();
     loop {
         println!("Waiting to receive message…");
         let msg = protocol::read_message(&mut stream).expect("Failed to read message from stream.");

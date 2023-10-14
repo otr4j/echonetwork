@@ -45,7 +45,7 @@ fn main() {
     let mut account = otrr::session::Account::new(
         Rc::new(client::Client::new(conn.try_clone().unwrap())),
         Policy::ALLOW_V3 | Policy::ALLOW_V4 | Policy::WHITESPACE_START_AKE | Policy::ERROR_START_AKE,
-    );
+    ).unwrap();
     loop {
         match interop_receiver.recv().unwrap() {
             InteropMessage::Receive(msg) => {
