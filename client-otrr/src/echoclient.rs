@@ -16,8 +16,9 @@ fn main() {
     let mut stream = TcpStream::connect("127.0.0.1:8080")
         .expect("Failed to open socket connection to echoserver.");
     let mut account = otrr::session::Account::new(
-        Rc::new(client::Client::new(stream.try_clone().unwrap())),
+        stream.local_addr().unwrap().to_string().into_bytes(),
         Policy::ALLOW_V3 | Policy::ALLOW_V4 | Policy::WHITESPACE_START_AKE | Policy::ERROR_START_AKE,
+        Rc::new(client::Client::new(stream.try_clone().unwrap())),
     ).unwrap();
     loop {
         println!("Waiting to receive message…");

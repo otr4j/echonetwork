@@ -44,6 +44,8 @@ _NOTE_ that we use the local address instead of the host name. This avoids issue
 
 - Design:
   - define a common format for issuing actions such as initiating/ending SMP via stdin (i.e. not every stdin input is a message)
+- Server:
+  - basic server-client signaling that can send notifications if, e.g. client disconnects.
 - client-otr4j-jitsi: add logging to identify session state changes.
 - server: if needed, future versions may include setting boundaries on message length, pretending lossy operations, shuffling/mixing messages etc.
 - `FIXME etc.`

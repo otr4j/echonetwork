@@ -19,6 +19,7 @@ fn main() {
         .expect("Failed to open socket connection to echoserver.");
     let (interop_sender, interop_receiver) = mpsc::sync_channel::<InteropMessage>(250);
     let input_sender = interop_sender.clone();
+    let account_id = conn.local_addr().unwrap().to_string().into_bytes();
 
     thread::spawn(move || {
         let mut input = std::io::stdin().lock();
@@ -43,8 +44,9 @@ fn main() {
     });
 
     let mut account = otrr::session::Account::new(
-        Rc::new(client::Client::new(conn.try_clone().unwrap())),
+        account_id,
         Policy::ALLOW_V3 | Policy::ALLOW_V4 | Policy::WHITESPACE_START_AKE | Policy::ERROR_START_AKE,
+        Rc::new(client::Client::new(conn.try_clone().unwrap())),
     ).unwrap();
     loop {
         match interop_receiver.recv().unwrap() {
