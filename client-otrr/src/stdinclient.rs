@@ -29,7 +29,9 @@ fn main() {
                 dbg!(cmd.unwrap_err());
                 continue;
             }
-            input_sender.send(InteropMessage::Send(cmd.unwrap())).expect("Interop-channel unexpectedly closed.");
+            input_sender
+                .send(InteropMessage::Send(cmd.unwrap()))
+                .expect("Interop-channel unexpectedly closed.");
         }
     });
 
@@ -40,14 +42,20 @@ fn main() {
             continue;
         }
         let data = data.unwrap();
-        interop_sender.send(InteropMessage::Receive(data)).expect("Interop-channel unexpectedly closed.");
+        interop_sender
+            .send(InteropMessage::Receive(data))
+            .expect("Interop-channel unexpectedly closed.");
     });
 
     let mut account = otrr::session::Account::new(
         account_id,
-        Policy::ALLOW_V3 | Policy::ALLOW_V4 | Policy::WHITESPACE_START_AKE | Policy::ERROR_START_AKE,
+        Policy::ALLOW_V3
+            | Policy::ALLOW_V4
+            | Policy::WHITESPACE_START_AKE
+            | Policy::ERROR_START_AKE,
         Rc::new(client::Client::new(conn.try_clone().unwrap())),
-    ).unwrap();
+    )
+    .unwrap();
     loop {
         match interop_receiver.recv().unwrap() {
             InteropMessage::Receive(msg) => {
@@ -74,31 +82,34 @@ enum InteropMessage {
 }
 
 fn handle(msg: UserMessage) -> Option<(InstanceTag, Vec<u8>)> {
-    println!("Waiting to receive message…");
+    eprintln!("Waiting to receive message…");
     // FIXME convert to string
     match msg {
         UserMessage::None => {
-            println!("Message processed without result for user.");
+            eprintln!("Message processed without result for user.");
             None
         }
         UserMessage::Error(err) => {
-            println!("Error occurred: {:?}", err);
+            eprintln!("Error occurred: {:?}", err);
             None
         }
         UserMessage::Plaintext(content) => {
-            println!(
+            eprintln!(
                 "Plaintext message: {:?}",
                 String::from_utf8(content.clone()).unwrap()
             );
             Some((0, content))
         }
         UserMessage::WarningUnencrypted(content) => {
-            println!("Received unencrypted message: {:?}", String::from_utf8(content.clone()).unwrap());
+            eprintln!(
+                "Received unencrypted message: {:?}",
+                String::from_utf8(content.clone()).unwrap()
+            );
             // FIXME add prefix message about "received this unencrypted: ..."
             Some((0, content))
         }
         UserMessage::Confidential(tag, content, tlvs) => {
-            println!(
+            eprintln!(
                 "Confidential message on instance {:?} with {} tlvs: {:?}",
                 tag,
                 tlvs.len(),
@@ -107,11 +118,11 @@ fn handle(msg: UserMessage) -> Option<(InstanceTag, Vec<u8>)> {
             Some((tag, content))
         }
         UserMessage::ConfidentialSessionStarted(tag) => {
-            println!("Confidential session started on {}", tag);
+            eprintln!("Confidential session started on {}", tag);
             None
         }
         UserMessage::ConfidentialSessionFinished(tag, content) => {
-            println!(
+            eprintln!(
                 "Confidential session finished on {}: {:?}",
                 tag,
                 String::from_utf8(content).unwrap()
@@ -119,15 +130,15 @@ fn handle(msg: UserMessage) -> Option<(InstanceTag, Vec<u8>)> {
             None
         }
         UserMessage::Reset(tag) => {
-            println!("State-reset to plaintext for {}", tag);
+            eprintln!("State-reset to plaintext for {}", tag);
             None
         }
         UserMessage::SMPSucceeded(tag) => {
-            println!("Successfully completed authentication (SMP) on {}", tag);
+            eprintln!("Successfully completed authentication (SMP) on {}", tag);
             None
         }
         UserMessage::SMPFailed(tag) => {
-            println!("Failed authentication (SMP) on {}", tag);
+            eprintln!("Failed authentication (SMP) on {}", tag);
             None
         }
     }
@@ -136,9 +147,12 @@ fn handle(msg: UserMessage) -> Option<(InstanceTag, Vec<u8>)> {
 fn read_command(input: &mut dyn BufRead) -> Result<(Vec<u8>, InstanceTag, Vec<u8>), Error> {
     let mut line = String::new();
     input.read_line(&mut line)?;
-    let (addresscell, message) = line.split_once(' ').ok_or(Error::from(ErrorKind::InvalidInput))?;
+    let (addresscell, message) = line
+        .split_once(' ')
+        .ok_or(Error::from(ErrorKind::InvalidInput))?;
     if let Some((address, tagvalue)) = addresscell.split_once('#') {
-        let tag = InstanceTag::from_str_radix(tagvalue, 10u32).or(Err(Error::from(ErrorKind::InvalidInput)))?;
+        let tag = InstanceTag::from_str_radix(tagvalue, 10u32)
+            .or(Err(Error::from(ErrorKind::InvalidInput)))?;
         Ok((Vec::from(address), tag, Vec::from(message)))
     } else {
         Ok((Vec::from(addresscell), 0, Vec::from(message)))
