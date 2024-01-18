@@ -101,9 +101,10 @@ final class Host implements OtrEngineHost {
         return this.forgingKeyPair;
     }
 
+    @Nonnull
     @Override
     public String getReplyForUnreadableMessage(@Nonnull final SessionID sessionID, @Nonnull final String identifier) {
-        return null;
+        return "Unreadable message";
     }
 
     @Override
