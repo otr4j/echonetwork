@@ -57,8 +57,10 @@ fn main() {
     )
     .unwrap();
     loop {
+        eprintln!("Waiting for incoming message or action input…");
         match interop_receiver.recv().unwrap() {
             InteropMessage::Receive(msg) => {
+                eprintln!("Processing incoming message…");
                 let result = account.session(&msg.0).receive(&msg.1);
                 if result.is_err() {
                     todo!("Handle error.");
@@ -67,6 +69,7 @@ fn main() {
             }
             // FIXME must check sending on particular outgoing session (instance tag)
             InteropMessage::Send(msg) => {
+                eprintln!("Executing action input…");
                 let result = account.session(&msg.0).send(msg.1, &msg.2);
                 for part in result.unwrap() {
                     write_message(&mut conn, &msg.0, &part).unwrap();
@@ -82,7 +85,6 @@ enum InteropMessage {
 }
 
 fn handle(msg: UserMessage) -> Option<(InstanceTag, Vec<u8>)> {
-    eprintln!("Waiting to receive message…");
     // FIXME convert to string
     match msg {
         UserMessage::None => {

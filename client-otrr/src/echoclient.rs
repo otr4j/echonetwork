@@ -27,7 +27,7 @@ fn main() {
     loop {
         eprintln!("Waiting to receive message…");
         let msg = protocol::read_message(&mut stream).expect("Failed to read message from stream.");
-        eprintln!("Processing message…");
+        eprintln!("Processing incoming message…");
         let result = account.session(&msg.0).receive(&msg.1);
         if let Err(err) = result {
             eprintln!("Error processing received message: {:?}", err);
