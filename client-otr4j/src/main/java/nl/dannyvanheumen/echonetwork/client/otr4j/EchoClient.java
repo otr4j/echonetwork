@@ -13,7 +13,7 @@ import net.java.otr4j.api.SessionID;
 import net.java.otr4j.session.OtrSessionManager;
 import nl.dannyvanheumen.echonetwork.protocol.Client;
 import nl.dannyvanheumen.echonetwork.protocol.EchoProtocol.Message;
-import utils.java.util.logging.LogManagers;
+import nl.dannyvanheumen.echonetwork.utils.LogManagers;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;

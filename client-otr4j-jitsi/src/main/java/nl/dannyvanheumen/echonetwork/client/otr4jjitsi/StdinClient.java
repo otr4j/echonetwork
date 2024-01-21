@@ -12,8 +12,8 @@ import net.java.otr4j.OtrSessionManagerImpl;
 import net.java.otr4j.session.Session;
 import net.java.otr4j.session.SessionID;
 import nl.dannyvanheumen.echonetwork.protocol.EchoProtocol;
-import utils.java.lang.Strings;
-import utils.java.util.logging.LogManagers;
+import nl.dannyvanheumen.echonetwork.utils.Strings;
+import nl.dannyvanheumen.echonetwork.utils.LogManagers;
 
 import javax.annotation.Nonnull;
 import java.io.BufferedReader;

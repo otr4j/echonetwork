@@ -15,13 +15,13 @@
         <module>client-otr4j</module>
         <module>client-otr4j-jitsi</module>
     </modules>
-    
+
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>utils</groupId>
-                <artifactId>utils</artifactId>
-                <version>0.10-SNAPSHOT</version>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+                <version>2.24.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

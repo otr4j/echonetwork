@@ -146,21 +146,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>3.1.6</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.github.spotbugs</groupId>
-                        <artifactId>spotbugs</artifactId>
-                        <version>3.1.6</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <excludeFilterFile>.config/spotbugs-filter.xml</excludeFilterFile>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>3.2.1</version>
@@ -240,10 +225,10 @@
             <version>3.0.2</version>
             <scope>provided</scope>
         </dependency>
-        <!--<dependency>-->
-        <!--    <groupId>utils</groupId>-->
-        <!--    <artifactId>utils</artifactId>-->
-        <!--    <version>0.10-SNAPSHOT</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>com.google.errorprone</groupId>
+            <artifactId>error_prone_annotations</artifactId>
+            <version>2.24.1</version>
+        </dependency>
     </dependencies>
 </project>
