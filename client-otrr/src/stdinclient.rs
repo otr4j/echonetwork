@@ -150,6 +150,8 @@ fn read_command(input: &mut dyn BufRead) -> Result<(Vec<u8>, InstanceTag, Vec<u8
     let mut line = String::new();
     input.read_line(&mut line)?;
     let (addresscell, message) = line
+        .strip_suffix('\n')
+        .expect("BUG: line-ending must be present.")
         .split_once(' ')
         .ok_or(Error::from(ErrorKind::InvalidInput))?;
     if let Some((address, tagvalue)) = addresscell.split_once('#') {
