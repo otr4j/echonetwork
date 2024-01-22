@@ -61,11 +61,7 @@ fn main() {
         match interop_receiver.recv().unwrap() {
             InteropMessage::Receive(msg) => {
                 eprintln!("Processing incoming message…");
-                let result = account.session(&msg.0).receive(&msg.1);
-                if result.is_err() {
-                    todo!("Handle error.");
-                }
-                handle(result.unwrap());
+                handle(account.session(&msg.0).receive(&msg.1).unwrap());
             }
             // FIXME must check sending on particular outgoing session (instance tag)
             InteropMessage::Send(msg) => {
