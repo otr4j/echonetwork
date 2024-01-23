@@ -2,7 +2,15 @@
 
 A trivially simple set-up for a communication network to exchange messages. This is close to the simplest possible implementation for exchanging messages, such that various OTR implementation can be set up to communicate.
 
-The "echo-network" is a "chat network" that is defined to provide a trivial infrastructure for cross-platform testing of OTR implementations.
+The "echo-network" is a "chat network" that is defined to provide a trivial infrastructure for cross-platform testing of OTR implementations. So far, interaction is manual. The clients are set up to either wait for stdin-input (stdin-client) or respond to incoming messages (echo-client). Echo-clients will respond to the OTR query-message by automatically initiating a session.
+
+Note: this is very "low-tech". The primary goal is a low-complexity way to have different libraries interact.
+
+## Supported libraries
+
+- [otr4j/otr4j](<https://github.com/otr4j/otr4j>)
+- [jitsi/otr4j](<https://github.com/jitsi/otr4j>)
+- [cobratbq/otrr (in-dev, experiment)](<https://github.com/cobratbq/otrr>)
 
 ## Network protocol
 
