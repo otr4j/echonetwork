@@ -9,8 +9,8 @@ import net.java.otr4j.api.Event;
 import net.java.otr4j.api.InstanceTag;
 import net.java.otr4j.api.OtrEngineHost;
 import net.java.otr4j.api.OtrPolicy;
-import net.java.otr4j.api.Session.Version;
 import net.java.otr4j.api.SessionID;
+import net.java.otr4j.api.Version;
 import net.java.otr4j.crypto.DSAKeyPair;
 import net.java.otr4j.crypto.OtrCryptoException;
 import net.java.otr4j.crypto.ed448.EdDSAKeyPair;
@@ -73,6 +73,7 @@ final class Host implements OtrEngineHost {
         }
     }
 
+    @Nonnull
     @Override
     public OtrPolicy getSessionPolicy(@Nonnull final SessionID sessionID) {
         return this.policy;
