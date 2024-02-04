@@ -22,8 +22,8 @@ impl otrr::Host for Client {
             .expect("Injection of content must succeed.");
     }
 
-    fn keypair(&self) -> &dsa::Keypair {
-        &self.keypair
+    fn keypair(&self) -> Option<&dsa::Keypair> {
+        Some(&self.keypair)
     }
 
     fn keypair_identity(&self) -> &ed448::EdDSAKeyPair {
