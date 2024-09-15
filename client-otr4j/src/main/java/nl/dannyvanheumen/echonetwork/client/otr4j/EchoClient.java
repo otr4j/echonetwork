@@ -5,6 +5,7 @@
 package nl.dannyvanheumen.echonetwork.client.otr4j;
 
 import net.java.otr4j.api.Event;
+import net.java.otr4j.api.Instance;
 import net.java.otr4j.api.InstanceTag;
 import net.java.otr4j.api.OtrException;
 import net.java.otr4j.api.OtrPolicy;
@@ -82,8 +83,11 @@ public final class EchoClient implements Client {
             }
             LOGGER.log(Level.INFO, "Echoing: ({0}, {1}) {2}",
                 new Object[]{message.tag, message.status, message.content});
-            final String[] parts = session.transformSending(message.content);
-            sendMessage(out, raw.address, parts);
+            final Instance instance = session.getInstance(message.tag);
+            if (instance == null) {
+                return;
+            }
+            sendMessage(out, raw.address, instance.transformSending(message.content));
         } catch (final OtrException e) {
             LOGGER.log(Level.INFO, "Failed to process content.", e);
         }
@@ -96,7 +100,12 @@ public final class EchoClient implements Client {
             if (action.event == Event.SMP_REQUEST_SECRET) {
                 final String question = Event.SMP_REQUEST_SECRET.convert(action.payload);
                 try {
-                    manager.getSession(action.sessionID).respondSmp(question, DEFAULT_SMP_SECRET);
+                    final Instance instance = manager.getSession(action.sessionID).getInstance(action.tag);
+                    if (instance == null) {
+                        LOGGER.log(Level.INFO, "Unknown instance specified. Ignoring. ({0})", action.tag);
+                        continue;
+                    }
+                    instance.respondSmp(question, DEFAULT_SMP_SECRET);
                 } catch (OtrException e) {
                     LOGGER.log(Level.WARNING, "Failed to handle SMP Request Secret event.");
                 }

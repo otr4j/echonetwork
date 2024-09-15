@@ -4,6 +4,7 @@
  */
 package nl.dannyvanheumen.echonetwork.client.otr4j;
 
+import net.java.otr4j.api.Instance;
 import net.java.otr4j.api.InstanceTag;
 import net.java.otr4j.api.OtrException;
 import net.java.otr4j.api.OtrPolicy;
@@ -90,9 +91,12 @@ public final class StdinClient implements Client {
                     final Message message = parseLine(reader.readLine());
                     final SessionID sessionID = new SessionID(localID, message.address, DEFAULT_PROTOCOL_NAME);
                     final Session session = manager.getSession(sessionID);
-                    // FIXME how to transform for particular instance tag? (seems missing in API)
-                    final String[] parts = session.transformSending(message.content);
-                    sendMessage(out, message.address, parts);
+                    final Instance instance = session.getInstance(new InstanceTag(message.tag));
+                    if (instance == null) {
+                        LOGGER.log(INFO, "Non-existant instance tag specified. Ignoring. ({0})", message.tag);
+                        continue;
+                    }
+                    sendMessage(out, message.address, instance.transformSending(message.content));
                 }
             }
         }
