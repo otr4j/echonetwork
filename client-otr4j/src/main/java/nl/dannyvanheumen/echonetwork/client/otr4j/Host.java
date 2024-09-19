@@ -163,8 +163,6 @@ final class Host implements OtrEngineHost {
             }
         } else if (event == Event.MESSAGE_FOR_ANOTHER_INSTANCE_RECEIVED) {
             LOGGER.log(Level.FINE, "messageFromAnotherInstanceReceived: {0}", new Object[]{sessionID});
-        } else if (event == Event.MULTIPLE_INSTANCES_DETECTED) {
-            LOGGER.log(Level.FINE, "multipleInstancesDetected: {0}", new Object[]{sessionID});
         } else if (event == Event.EXTRA_SYMMETRIC_KEY_DISCOVERED) {
             final Event.ExtraSymmetricKey extraSymmetricKey = Event.EXTRA_SYMMETRIC_KEY_DISCOVERED.convert(payload);
             LOGGER.log(Level.FINE, "extraSymmetricKeyDiscovered: {0}: {1}", new Object[]{sessionID, extraSymmetricKey});
